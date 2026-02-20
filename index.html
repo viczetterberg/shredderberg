@@ -859,7 +859,16 @@ document.getElementById('meal-photo-input').addEventListener('change', async fun
       headers: { 'Content-Type': 'application/json', 'X-API-Key': s.apiKey },
       body: JSON.stringify({ image: base64, media_type: file.type || 'image/jpeg' }),
     });
+    if (!resp.ok) {
+      const errBody = await resp.text();
+      throw new Error('Worker returned ' + resp.status + ': ' + errBody.slice(0, 200));
+    }
     const data = await resp.json();
+
+    // Check for API error response
+    if (data.error) {
+      throw new Error(data.error.message || JSON.stringify(data.error));
+    }
 
     // Parse Claude's response
     let foodData;
@@ -870,6 +879,7 @@ document.getElementById('meal-photo-input').addEventListener('change', async fun
     }
 
     document.getElementById('meal-ai-loading').classList.add('hidden');
+    document.getElementById('meal-photo-btn').classList.remove('hidden');
     document.getElementById('meal-form-section').classList.remove('hidden');
 
     if (foodData) {
@@ -878,6 +888,8 @@ document.getElementById('meal-photo-input').addEventListener('change', async fun
       document.getElementById('meal-protein').value = foodData.protein || '';
       document.getElementById('meal-carbs').value = foodData.carbs || '';
       document.getElementById('meal-fat').value = foodData.fat || '';
+    } else {
+      alert('Could not parse food data from AI response. Please enter manually.');
     }
 
     // Save photo to IndexedDB
@@ -885,6 +897,7 @@ document.getElementById('meal-photo-input').addEventListener('change', async fun
     await savePhoto(photoId, file);
   } catch (err) {
     document.getElementById('meal-ai-loading').classList.add('hidden');
+    document.getElementById('meal-photo-btn').classList.remove('hidden');
     document.getElementById('meal-form-section').classList.remove('hidden');
     alert('AI recognition failed: ' + err.message);
   }
