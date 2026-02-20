@@ -268,6 +268,29 @@ input:focus, select:focus { border-color: var(--accent); }
   border-radius: 6px; padding: 8px 10px; margin-bottom: 12px;
 }
 .ex-history strong { color: var(--green); }
+
+/* Macro bars */
+.macro-card { padding: 12px 16px; }
+.macro-bar-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.macro-bar-row:last-child { margin-bottom: 0; }
+.macro-bar-label { font-size: 12px; font-weight: 600; width: 16px; text-align: center; }
+.macro-bar-track {
+  flex: 1; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden;
+}
+.macro-bar-fill {
+  height: 100%; border-radius: 4px; transition: width 0.4s ease;
+}
+.macro-bar-fill.protein { background: var(--blue); }
+.macro-bar-fill.carbs { background: var(--orange); }
+.macro-bar-fill.fat { background: var(--red); }
+.macro-bar-val { font-size: 12px; color: var(--text2); min-width: 55px; text-align: right; }
+
+/* AI text input */
+.ai-text-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.ai-text-row input { flex: 1; margin-bottom: 0; }
+.ai-text-row button { flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -373,15 +396,37 @@ input:focus, select:focus { border-color: var(--accent); }
   <!-- Meals -->
   <div id="tab-meals" class="tab-content">
     <h1>Meals</h1>
-    <div class="row mb-16">
-      <button class="btn btn-primary" onclick="openMealModal('manual')">+ Add Meal</button>
-      <button class="btn btn-secondary" onclick="openMealModal('photo')">📷 Photo AI</button>
+    <div class="ai-text-row">
+      <input type="text" id="ai-text-input" placeholder="e.g. 2 eggs and toast with butter" style="font-size:14px">
+      <button class="btn btn-primary" onclick="aiTextLookup()" id="ai-text-btn">AI</button>
     </div>
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h3 style="margin:0">Today's Meals</h3>
+    <div class="row mb-16">
+      <button class="btn btn-primary" onclick="openMealModal('manual')">+ Manual</button>
+      <button class="btn btn-secondary" onclick="openMealModal('photo')">📷 Photo</button>
+    </div>
+    <div class="card macro-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3 style="margin:0">Macros</h3>
         <span class="text-accent" style="font-weight:700" id="meals-total">0 cal</span>
       </div>
+      <div class="macro-bar-row">
+        <span class="macro-bar-label" style="color:var(--blue)">P</span>
+        <div class="macro-bar-track"><div class="macro-bar-fill protein" id="macro-bar-p" style="width:0%"></div></div>
+        <span class="macro-bar-val" id="macro-val-p">0 / 180g</span>
+      </div>
+      <div class="macro-bar-row">
+        <span class="macro-bar-label" style="color:var(--orange)">C</span>
+        <div class="macro-bar-track"><div class="macro-bar-fill carbs" id="macro-bar-c" style="width:0%"></div></div>
+        <span class="macro-bar-val" id="macro-val-c">0g</span>
+      </div>
+      <div class="macro-bar-row">
+        <span class="macro-bar-label" style="color:var(--red)">F</span>
+        <div class="macro-bar-track"><div class="macro-bar-fill fat" id="macro-bar-f" style="width:0%"></div></div>
+        <span class="macro-bar-val" id="macro-val-f">0g</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px">Today's Meals</h3>
       <ul class="entry-list" id="meals-list"></ul>
       <p id="meals-empty" class="hidden" style="text-align:center;color:var(--text2);padding:20px;font-size:14px">No meals logged today</p>
     </div>
@@ -485,7 +530,9 @@ input:focus, select:focus { border-color: var(--accent); }
       <h3>Calorie Target</h3>
       <label>Daily Calorie Goal</label>
       <input type="number" id="set-calgoal">
-      <p style="font-size:12px;color:var(--text2)">Recommended: TDEE minus 500 for ~1 lb/week loss</p>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Recommended: TDEE minus 500 for ~1 lb/week loss</p>
+      <label>Protein Target (g)</label>
+      <input type="number" id="set-protein-goal" placeholder="180">
     </div>
     <div class="card">
       <h3>AI Food Recognition</h3>
@@ -742,6 +789,7 @@ function loadSettings() {
   document.getElementById('set-goal').value = s.goalWeight || '';
   document.getElementById('set-activity').value = s.activity || 1.55;
   document.getElementById('set-calgoal').value = s.calorieGoal || '';
+  document.getElementById('set-protein-goal').value = s.proteinGoal || 180;
   document.getElementById('set-apikey').value = s.apiKey || '';
   document.getElementById('set-worker').value = s.workerUrl || '';
   document.getElementById('set-tdee').textContent = calcTDEE(s) + ' cal';
@@ -756,6 +804,7 @@ function saveSettings() {
   s.goalWeight = +document.getElementById('set-goal').value;
   s.activity = +document.getElementById('set-activity').value;
   s.calorieGoal = +document.getElementById('set-calgoal').value;
+  s.proteinGoal = +document.getElementById('set-protein-goal').value || 180;
   s.apiKey = document.getElementById('set-apikey').value;
   s.workerUrl = document.getElementById('set-worker').value;
   s.tdee = calcTDEE(s);
@@ -934,6 +983,65 @@ function saveMeal() {
   refreshDashboard();
 }
 
+async function aiTextLookup() {
+  const input = document.getElementById('ai-text-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const s = getSettings();
+  if (!s.apiKey || !s.workerUrl) {
+    alert('Please set your API key and Worker URL in Settings first.');
+    return;
+  }
+  const btn = document.getElementById('ai-text-btn');
+  btn.textContent = '...';
+  btn.disabled = true;
+  try {
+    const resp = await fetch(s.workerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': s.apiKey },
+      body: JSON.stringify({ text }),
+    });
+    if (!resp.ok) throw new Error('Worker returned ' + resp.status);
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    let foodData;
+    if (data.content && data.content[0] && data.content[0].text) {
+      const jsonMatch = data.content[0].text.match(/\{[\s\S]*?\}/);
+      if (jsonMatch) foodData = JSON.parse(jsonMatch[0]);
+    }
+    if (!foodData) throw new Error('Could not parse AI response');
+    const meal = {
+      id: Date.now(),
+      name: foodData.name || text,
+      calories: foodData.calories || 0,
+      protein: foodData.protein || 0,
+      carbs: foodData.carbs || 0,
+      fat: foodData.fat || 0,
+      type: guessType(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    const meals = getMeals();
+    meals.push(meal);
+    setMeals(meals);
+    input.value = '';
+    refreshMeals();
+    refreshDashboard();
+  } catch (err) {
+    alert('AI lookup failed: ' + err.message);
+  } finally {
+    btn.textContent = 'AI';
+    btn.disabled = false;
+  }
+}
+
+function guessType() {
+  const h = new Date().getHours();
+  if (h < 11) return 'breakfast';
+  if (h < 15) return 'lunch';
+  if (h < 20) return 'dinner';
+  return 'snack';
+}
+
 function deleteMeal(id) {
   const meals = getMeals().filter(m => m.id !== id);
   setMeals(meals);
@@ -943,20 +1051,40 @@ function deleteMeal(id) {
 
 function refreshMeals() {
   const meals = getMeals();
+  const s = getSettings();
+  const proteinGoal = s.proteinGoal || 180;
   const list = document.getElementById('meals-list');
   const empty = document.getElementById('meals-empty');
   list.innerHTML = '';
+
+  let total = 0, totalP = 0, totalC = 0, totalF = 0;
+  meals.forEach(m => {
+    total += m.calories;
+    totalP += m.protein || 0;
+    totalC += m.carbs || 0;
+    totalF += m.fat || 0;
+  });
+
+  // Update macro bars
+  document.getElementById('meals-total').textContent = total + ' cal';
+  const pPct = Math.min((totalP / proteinGoal) * 100, 100);
+  document.getElementById('macro-bar-p').style.width = pPct + '%';
+  document.getElementById('macro-val-p').textContent = totalP + ' / ' + proteinGoal + 'g';
+  // Carbs and fat don't have targets, just show totals with proportional bars
+  const maxMacro = Math.max(totalP, totalC, totalF, 1);
+  document.getElementById('macro-bar-c').style.width = Math.min((totalC / maxMacro) * 100, 100) + '%';
+  document.getElementById('macro-val-c').textContent = totalC + 'g';
+  document.getElementById('macro-bar-f').style.width = Math.min((totalF / maxMacro) * 100, 100) + '%';
+  document.getElementById('macro-val-f').textContent = totalF + 'g';
+
   if (meals.length === 0) {
     empty.classList.remove('hidden');
-    document.getElementById('meals-total').textContent = '0 cal';
     return;
   }
   empty.classList.add('hidden');
-  let total = 0;
   const typeOrder = ['breakfast', 'lunch', 'dinner', 'snack'];
   const sorted = [...meals].sort((a, b) => typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type));
   sorted.forEach(m => {
-    total += m.calories;
     const li = document.createElement('li');
     li.className = 'entry-item';
     li.innerHTML = `
@@ -969,7 +1097,6 @@ function refreshMeals() {
     `;
     list.appendChild(li);
   });
-  document.getElementById('meals-total').textContent = total + ' cal';
 }
 
 // ===== Exercise =====
