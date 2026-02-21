@@ -426,9 +426,13 @@ input:focus, select:focus { border-color: var(--accent); }
       </div>
     </div>
     <div class="card">
-      <h3 style="margin-bottom:8px">Today's Meals</h3>
+      <div class="cal-header" style="margin-bottom:8px">
+        <button onclick="mealsPrevDay()">&lsaquo;</button>
+        <h3 style="margin:0;text-transform:none;letter-spacing:0;font-size:15px;color:var(--text)" id="meals-day-label">Today's Meals</h3>
+        <button onclick="mealsNextDay()">&rsaquo;</button>
+      </div>
       <ul class="entry-list" id="meals-list"></ul>
-      <p id="meals-empty" class="hidden" style="text-align:center;color:var(--text2);padding:20px;font-size:14px">No meals logged today</p>
+      <p id="meals-empty" class="hidden" style="text-align:center;color:var(--text2);padding:20px;font-size:14px">No meals logged</p>
     </div>
   </div>
 
@@ -857,8 +861,24 @@ document.querySelectorAll('.modal-overlay').forEach(el => {
 });
 
 // ===== Meals =====
-function getMeals(date) { return LS.get('meals_' + (date || today())) || []; }
-function setMeals(meals, date) { LS.set('meals_' + (date || today()), meals); }
+let mealsDate = null;
+function getMealsDate() { return mealsDate || today(); }
+function getMeals(date) { return LS.get('meals_' + (date || getMealsDate())) || []; }
+function setMeals(meals, date) { LS.set('meals_' + (date || getMealsDate()), meals); }
+function mealsPrevDay() {
+  const d = new Date(getMealsDate() + 'T12:00:00');
+  d.setDate(d.getDate() - 1);
+  mealsDate = d.toISOString().split('T')[0];
+  refreshMeals();
+}
+function mealsNextDay() {
+  const d = new Date(getMealsDate() + 'T12:00:00');
+  d.setDate(d.getDate() + 1);
+  const next = d.toISOString().split('T')[0];
+  if (next > today()) return;
+  mealsDate = next;
+  refreshMeals();
+}
 
 function openMealModal(mode) {
   const photoSection = document.getElementById('meal-photo-section');
@@ -975,6 +995,7 @@ function saveMeal() {
     type: document.querySelector('#meal-type-pills .pill.active')?.dataset.val || 'snack',
     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   };
+  mealsDate = null; // save to today
   const meals = getMeals();
   meals.push(meal);
   setMeals(meals);
@@ -1020,6 +1041,7 @@ async function aiTextLookup() {
       type: guessType(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
+    mealsDate = null; // save to today
     const meals = getMeals();
     meals.push(meal);
     setMeals(meals);
@@ -1050,6 +1072,11 @@ function deleteMeal(id) {
 }
 
 function refreshMeals() {
+  const date = getMealsDate();
+  const isToday = date === today();
+  const dateObj = new Date(date + 'T12:00:00');
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('meals-day-label').textContent = isToday ? "Today's Meals" : monthNames[dateObj.getMonth()] + ' ' + dateObj.getDate() + ', ' + dateObj.getFullYear();
   const meals = getMeals();
   const s = getSettings();
   const proteinGoal = s.proteinGoal || 180;
