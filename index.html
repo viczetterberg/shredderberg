@@ -720,7 +720,7 @@ input:focus, select:focus { border-color: var(--accent); }
 
 <script>
 // ===== Utility =====
-const today = () => new Date().toISOString().split('T')[0];
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const LS = {
   get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
   set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
@@ -1503,6 +1503,32 @@ function importWorkoutHistory() {
   LS.set('workout_history_imported', true);
 }
 
+// ===== One-time migration: shift meals back 1 day (UTC→local fix) =====
+function migrateMealDates() {
+  if (LS.get('meals_date_migrated')) return;
+  // Collect all meals_YYYY-MM-DD keys, shift each back by 1 day
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith('meals_')) keys.push(k);
+  }
+  // Sort descending so we don't overwrite as we shift
+  keys.sort().reverse();
+  keys.forEach(k => {
+    const dateStr = k.replace('meals_', '');
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    const newDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const newKey = 'meals_' + newDate;
+    const data = LS.get(k);
+    // Merge if target date already has data
+    const existing = LS.get(newKey) || [];
+    LS.set(newKey, [...existing, ...data]);
+    localStorage.removeItem(k);
+  });
+  LS.set('meals_date_migrated', true);
+}
+
 // ===== Weight =====
 function getWeights() { return LS.get('weights') || []; }
 
@@ -1724,6 +1750,7 @@ function refreshAll() {
 (async function init() {
   await openPhotoDB();
   importWorkoutHistory();
+  migrateMealDates();
   document.getElementById('exercise-date').value = today();
   initCalendar();
   loadSettings();
