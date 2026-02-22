@@ -1729,6 +1729,14 @@ function refreshAll() {
   loadSettings();
   refreshAll();
 })();
+
+// Reset to today when app resumes from background
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    mealsDate = null;
+    refreshAll();
+  }
+});
 </script>
 </body>
 </html>
