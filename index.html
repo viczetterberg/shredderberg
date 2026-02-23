@@ -1503,35 +1503,7 @@ function importWorkoutHistory() {
   LS.set('workout_history_imported', true);
 }
 
-// ===== One-time migration: redistribute meals by their timestamp =====
-function migrateMealDates() {
-  if (LS.get('meals_date_migrated_v2')) return;
-  // Collect all meals from all dates
-  const allMeals = [];
-  const keys = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k.startsWith('meals_')) keys.push(k);
-  }
-  keys.forEach(k => {
-    const meals = LS.get(k) || [];
-    allMeals.push(...meals);
-    localStorage.removeItem(k);
-  });
-  // Redistribute each meal to the correct local date using its id (timestamp)
-  const byDate = {};
-  allMeals.forEach(m => {
-    if (!m.id) return;
-    const d = new Date(m.id);
-    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    if (!byDate[ds]) byDate[ds] = [];
-    byDate[ds].push(m);
-  });
-  for (const [date, meals] of Object.entries(byDate)) {
-    LS.set('meals_' + date, meals);
-  }
-  LS.set('meals_date_migrated_v2', true);
-}
+function migrateMealDates() { /* no-op, migration complete */ }
 
 // ===== Weight =====
 function getWeights() { return LS.get('weights') || []; }
