@@ -1505,6 +1505,34 @@ function importWorkoutHistory() {
 
 function migrateMealDates() { /* no-op, migration complete */ }
 
+// Move exercises with yesterday's timestamp from today's key to yesterday's key
+function migrateExerciseDates() {
+  if (LS.get('exercise_date_migrated')) return;
+  const todayStr = today();
+  const exs = LS.get('exercises_' + todayStr) || [];
+  if (exs.length === 0) { LS.set('exercise_date_migrated', true); return; }
+  const keep = [];
+  const moveByDate = {};
+  exs.forEach(e => {
+    if (!e.id || typeof e.id !== 'number') { keep.push(e); return; }
+    const d = new Date(e.id);
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (ds === todayStr) { keep.push(e); }
+    else {
+      if (!moveByDate[ds]) moveByDate[ds] = [];
+      moveByDate[ds].push(e);
+    }
+  });
+  if (Object.keys(moveByDate).length > 0) {
+    LS.set('exercises_' + todayStr, keep);
+    for (const [date, moved] of Object.entries(moveByDate)) {
+      const existing = LS.get('exercises_' + date) || [];
+      LS.set('exercises_' + date, [...existing, ...moved]);
+    }
+  }
+  LS.set('exercise_date_migrated', true);
+}
+
 // ===== Weight =====
 function getWeights() { return LS.get('weights') || []; }
 
@@ -1727,6 +1755,7 @@ function refreshAll() {
   await openPhotoDB();
   importWorkoutHistory();
   migrateMealDates();
+  migrateExerciseDates();
   document.getElementById('exercise-date').value = today();
   initCalendar();
   loadSettings();
