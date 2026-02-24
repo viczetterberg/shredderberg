@@ -2021,238 +2021,346 @@ document.addEventListener('visibilitychange', () => {
     return c;
   }
 
-  // Pixel art sprites — each row is a line of pixels, chars map to colors
-  // . = transparent, K = black, S = skin, H = hair, T = shirt, P = pants
-  // W = white, O = shoe, B = board/green, R = red, G = teal, Y = yellow
-  // C = gray, D = dark skin shadow, N = nose/mouth, V = visor/accessory
-  // A = alt color accent, Q = strap/belt, Z = highlight, I = inner shade
-  const PAL = {
-    K:[0x12,0x12,0x10],S:[0xd4,0xa5,0x74],D:[0xb8,0x8a,0x5c],H:[0x8b,0x65,0x08],
-    T:[0xb5,0x65,0x1d],I:[0x96,0x52,0x16],P:[0x3a,0x3a,0x50],W:[0xd4,0xd0,0xc8],
-    O:[0x2a,0x2a,0x22],B:[0x6b,0x8e,0x23],R:[0x8b,0x3a,0x3a],G:[0x4a,0x7a,0x7a],
-    Y:[0xb5,0x95,0x1d],C:[0x5a,0x5a,0x50],N:[0xb0,0x80,0x58],V:[0x6b,0x8e,0x8e],
-    A:[0xd4,0x55,0x1d],Q:[0x46,0x38,0x24],Z:[0xe8,0xd0,0xa0],L:[0x7a,0x77,0x6e],
-    E:[0xd4,0xd0,0xc8],M:[0x52,0x44,0x30],F:[0x46,0x38,0x24]
-  };
-
-  // Skater mid-kickflip — baggy clothes, backwards cap, arms out
-  const SKATER = [
-    '......KKKK..........',
-    '.....KHHHHK.........',
-    '....KHHHHHKK........',
-    '....KHHHHHHK........',
-    '...KKKHHKKKK........',
-    '...KSSDSSK..........',
-    '...KSSNSSKK.........',
-    '...KKSSSKK..........',
-    '..KTTTTTTTTK........',
-    '..KTTIIIITTK........',
-    '.KTTTIIIITTTK.......',
-    '.KTTTTTTTTTTK.......',
-    'KTTTTTTTTTTTTKK.....',
-    'KSSKK...KKTTKKSK....',
-    '.KSK.....KKKKSSK....',
-    '..KK......KSSKK.....',
-    '..KPPPPPPPPK........',
-    '.KPPPPPPPPPKK.......',
-    '.KPPPKKKPPPPK.......',
-    'KPPPK...KPPPK.......',
-    'KPPK.....KPPK.......',
-    'KOKK......KOKK......',
-    'KOOKK.....KOOKK.....',
-    'KKKKK......KKKKK....',
-    '..KBBBBBBBBBBBBK....',
-    '.KBBBBBBBBBBBBBBK...',
-    '.KBKBKBKBKBKBKBBK...',
-    '..KKKKKKKKKKKKKKKK..',
-  ];
-
-  // Surfer crouching on board riding a wave — board shorts, no shirt
-  const SURFER = [
-    '.......KKKK.........',
-    '......KHHHHK........',
-    '.....KHHHHHKK.......',
-    '.....KHHHHHHK.......',
-    '....KKSSDSKKK.......',
-    '....KSSNSSK.........',
-    '....KKSDSSKK........',
-    '...KSSDDSSDSK.......',
-    '..KKSSDDSSDSKK......',
-    '..KSSDDDDDDSSKK....',
-    '.KSK.KDDDDKK.KSK...',
-    '.KK..KDDDDKK..KK...',
-    '.....KPPPPK.........',
-    '....KPPPPPPK........',
-    '...KPPAPPPPK........',
-    '...KPPAPPAPK........',
-    '..KPPK..KPPK........',
-    '..KOK....KOK........',
-    '..KOK....KOKK.......',
-    '..KKK.....KKK.......',
-    'KBBBBBBBBBBBBBBBBK..',
-    'KBBBBBBBBBBBBBBBBKK.',
-    'KBKBKBKBKBKBKBKBBKK',
-    '.KKKKKKKKKKKKKKKKKK.',
-    'GGGGGGGGGGGGGGGGGGGG',
-    'KGKGGKGGGKGGKGGGKGG',
-    'GGGGGGGGGGGGGGGGGGGG',
-    '.GGGGGGGGGGGGGGGGG..',
-  ];
-
-  // Skier in tuck position — goggles, jacket, poles out behind
-  const SKIER = [
-    '......KKKK..........',
-    '.....KVVVVK.........',
-    '....KVVVVVVK........',
-    '....KVVVVVVK........',
-    '...KKSSDSKKK........',
-    '...KSSNSSK..........',
-    '...KKSSSSKK.........',
-    '..KRRRRRRRRKK.......',
-    '..KRRRIIIIRRKK......',
-    '.KRRRRIIIIRRRK......',
-    '.KRRRRRRRRRRRKK.....',
-    'KRRRRRRRRRRRRRKK....',
-    'KSSKK....KKRRKKSK...',
-    '.KSK......KKKSSK....',
-    '..KPPPPPPPPPPK......',
-    '.KPPPPPPPPPPPK......',
-    '.KPPPKKKKPPPPK......',
-    'KPPPK....KPPPK.....',
-    'KPPK......KPPK.....',
-    'KOKK.......KOKK....',
-    'KOOKK......KOOKK...',
-    'KKKKK.......KKKKK..',
-    'KBBBBBBBBBBBBBBBBK..',
-    'KBBBBBBBBBBBBBBBBKK.',
-    'K..................K',
-    '.K................K.',
-    '..K..............K..',
-  ];
-
-  // Punk with tall mohawk, studded vest, combat boots, throwing horns
-  const PUNK = [
-    '.....KRK............',
-    '....KRKRK...........',
-    '....KRHRKK..........',
-    '...KRHHHRKK.........',
-    '...KRHHHRK..........',
-    '...KHHHHKK..........',
-    '..KKSSDSKKK.........',
-    '..KSSNSSK...........',
-    '..KKSSSSKK..........',
-    '.KKKKKKKKKK.........',
-    '.KKYYKKYYKK.........',
-    'KKYYYKKYYYKK........',
-    'KKYYYYYYYYYYKKK.....',
-    '.KKQQQQQQQKK.KSK...',
-    '..KSSKK..KK..KSSK..',
-    '..KSKK....K..KKSK..',
-    '..KPPPPPPPPPK..KK...',
-    '.KPPPPPPPPPPPK......',
-    '.KPPPPKKKKPPPK......',
-    'KPPPK.....KPPPK....',
-    'KPPK.......KPPK....',
-    'KOOKK......KOOKK...',
-    'KOOOKK.....KOOOKK..',
-    'KKKKKK......KKKKKK.',
-  ];
-
-  // Dude eating a burger for meals tab — backwards cap, big burger
-  const EATER = [
-    '......KKKK..........',
-    '.....KHHHHK.........',
-    '....KHHHHHHK........',
-    '....KKHHKKKK........',
-    '...KSSDSSK..........',
-    '...KSSNSSKK.........',
-    '...KKSSKKKK.........',
-    'KKKKK.KSSK..........',
-    'KYYZYK.KSK..........',
-    'KYZYZK..KK..........',
-    'KRRYRK..............',
-    'KBYRYKK.............',
-    'KYYZYK..............',
-    'KKKKKKK.............',
-    '..KTTTTTTTTK........',
-    '..KTTIIIITTK........',
-    '.KTTTIIIITTTK.......',
-    '.KTTTTTTTTTTK.......',
-    '..KPPPPPPPK.........',
-    '.KPPPPPPPPKK........',
-    '.KPPPKKKPPPK........',
-    'KPPK.....KPPK......',
-    'KOKK......KOKK.....',
-    'KOOKK.....KOOKK....',
-    'KKKKK......KKKKK...',
-  ];
-
-  // Weightlifter — muscular, barbell overhead, tank top
-  const LIFTER = [
-    'KCKK..KKKK..KKCK...',
-    'KCKK..KKKK..KKCK...',
-    'KCKKKKSSKKKKKKCK....',
-    'KCKK.KSSSKK.KKCK...',
-    '.KK..KSSSSKK..KK...',
-    '.....KSSNSSK........',
-    '.....KKSSSSKK.......',
-    '....KTTTTTTTTK......',
-    '...KTTTIIIITTTK.....',
-    '...KTTTTTTTTTTK.....',
-    '..KTTTTTTTTTTTTKK...',
-    '..KDSSK.KKTTKKDSK...',
-    '...KDSK..KKK.KDSK..',
-    '...KKSK.......KSKK.',
-    '....KPPPPPPPPPK.....',
-    '...KPPPPPPPPPPKK....',
-    '...KPPPKKKKPPPPK....',
-    '..KPPPK....KPPPK...',
-    '..KPPK......KPPK...',
-    '.KOKK........KOKK..',
-    '.KOOKK.......KOOKK.',
-    '.KKKKK........KKKKK',
-  ];
-
-  const SPRITES = {
-    'tab-dashboard': [SKATER, PUNK],
-    'tab-meals': [EATER, SURFER],
-    'tab-exercise': [SKIER, SKATER],
-    'tab-weight': [LIFTER, PUNK],
-  };
-
-  function drawSprite(ctx, sprite, px, py, scale) {
-    for (let row = 0; row < sprite.length; row++) {
-      for (let col = 0; col < sprite[row].length; col++) {
-        const ch = sprite[row][col];
-        if (ch === '.' || !PAL[ch]) continue;
-        const c = PAL[ch];
-        const v = ((row * 7 + col * 13) % 7) - 3;
-        ctx.fillStyle = `rgb(${Math.max(0,c[0]+v)},${Math.max(0,c[1]+v)},${Math.max(0,c[2]+v)})`;
-        ctx.fillRect(px + col * scale, py + row * scale, scale, scale);
-      }
-    }
+  // HD canvas-drawn characters — THPS-style with proper anatomy and shading
+  function drawSkater(ctx, x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    // Shadow on ground
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(40,195,35,8,0,0,Math.PI*2);ctx.fill();
+    // Skateboard — tilted mid-kickflip
+    ctx.save();ctx.translate(40,178);ctx.rotate(-0.3);
+    var bg=ctx.createLinearGradient(-30,0,30,0);bg.addColorStop(0,'#5a4a2a');bg.addColorStop(0.5,'#7a6a3a');bg.addColorStop(1,'#5a4a2a');
+    ctx.fillStyle=bg;ctx.beginPath();ctx.moveTo(-35,-3);ctx.quadraticCurveTo(-38,-8,-32,-8);ctx.lineTo(32,-8);ctx.quadraticCurveTo(38,-8,35,-3);ctx.quadraticCurveTo(38,2,32,2);ctx.lineTo(-32,2);ctx.quadraticCurveTo(-38,2,-35,-3);ctx.fill();
+    ctx.fillStyle='#333';ctx.beginPath();ctx.arc(-22,4,4,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(22,4,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ddd';ctx.beginPath();ctx.arc(-22,4,2.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(22,4,2.5,0,Math.PI*2);ctx.fill();
+    // Board graphic — stripe
+    ctx.strokeStyle='#8b3a3a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-20,-5);ctx.lineTo(20,-5);ctx.stroke();
+    ctx.restore();
+    // Left leg — bent, baggy jeans
+    var lg=ctx.createLinearGradient(20,120,20,170);lg.addColorStop(0,'#3a3a50');lg.addColorStop(0.5,'#4a4a62');lg.addColorStop(1,'#3a3a50');
+    ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(28,125);ctx.quadraticCurveTo(15,145,20,170);ctx.lineTo(30,172);ctx.quadraticCurveTo(35,145,38,125);ctx.fill();
+    // Right leg — kicked out
+    ctx.fillStyle=lg;ctx.beginPath();ctx.moveTo(42,125);ctx.quadraticCurveTo(60,140,62,165);ctx.lineTo(70,167);ctx.quadraticCurveTo(58,138,50,125);ctx.fill();
+    // Shoes
+    ctx.fillStyle='#2a2a22';ctx.beginPath();ctx.moveTo(17,168);ctx.lineTo(32,168);ctx.quadraticCurveTo(34,176,17,176);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#2a2a22';ctx.beginPath();ctx.moveTo(58,163);ctx.lineTo(73,163);ctx.quadraticCurveTo(75,171,58,171);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#ddd';ctx.fillRect(18,172,12,2);ctx.fillRect(59,167,12,2);
+    // Torso — baggy t-shirt, slightly leaning
+    var tg=ctx.createLinearGradient(25,60,55,120);tg.addColorStop(0,'#7a7a7a');tg.addColorStop(0.3,'#8a8a8a');tg.addColorStop(0.7,'#6a6a6a');tg.addColorStop(1,'#5a5a5a');
+    ctx.fillStyle=tg;ctx.beginPath();ctx.moveTo(22,65);ctx.quadraticCurveTo(20,90,25,125);ctx.lineTo(55,125);ctx.quadraticCurveTo(58,90,56,65);ctx.closePath();ctx.fill();
+    // Shirt graphic — circle logo like THPS
+    ctx.strokeStyle='#222';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(38,92,10,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(32,88);ctx.quadraticCurveTo(38,82,44,88);ctx.stroke();
+    // Left arm — reaching out
+    ctx.fillStyle='#888';ctx.beginPath();ctx.moveTo(22,68);ctx.quadraticCurveTo(5,80,2,100);ctx.lineTo(8,102);ctx.quadraticCurveTo(10,82,26,72);ctx.fill();
+    // Left hand
+    ctx.fillStyle='#d4a574';ctx.beginPath();ctx.arc(4,102,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#b88a5c';ctx.beginPath();ctx.arc(4,102,5,0.5,Math.PI);ctx.fill();
+    // Right arm — behind
+    ctx.fillStyle='#777';ctx.beginPath();ctx.moveTo(56,68);ctx.quadraticCurveTo(72,78,75,95);ctx.lineTo(70,97);ctx.quadraticCurveTo(68,80,54,72);ctx.fill();
+    ctx.fillStyle='#d4a574';ctx.beginPath();ctx.arc(74,97,4.5,0,Math.PI*2);ctx.fill();
+    // Neck
+    ctx.fillStyle='#b8a888';ctx.fillRect(34,55,10,12);
+    // Head — angular THPS-style
+    var hg=ctx.createLinearGradient(24,18,56,60);hg.addColorStop(0,'#d8c8a8');hg.addColorStop(0.4,'#ccba94');hg.addColorStop(1,'#a89070');
+    ctx.fillStyle=hg;ctx.beginPath();ctx.moveTo(25,52);ctx.quadraticCurveTo(24,59,39,61);ctx.quadraticCurveTo(54,59,53,52);ctx.lineTo(55,28);ctx.quadraticCurveTo(54,16,39,15);ctx.quadraticCurveTo(24,16,23,28);ctx.closePath();ctx.fill();
+    // Cheekbone shadows
+    ctx.fillStyle='rgba(0,0,0,0.1)';ctx.beginPath();ctx.ellipse(28,47,5,3,0.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(50,47,5,3,-0.3,0,Math.PI*2);ctx.fill();
+    // Hair — shaggy brown, 2000s style
+    ctx.fillStyle='#6b4508';ctx.beginPath();ctx.moveTo(23,32);ctx.quadraticCurveTo(25,14,39,12);ctx.quadraticCurveTo(53,14,56,28);ctx.lineTo(56,35);ctx.quadraticCurveTo(50,22,39,20);ctx.quadraticCurveTo(28,22,23,35);ctx.fill();
+    // Side hair wisps
+    ctx.fillStyle='#7a5510';ctx.beginPath();ctx.moveTo(23,32);ctx.quadraticCurveTo(20,38,22,44);ctx.quadraticCurveTo(24,38,25,32);ctx.fill();
+    ctx.beginPath();ctx.moveTo(55,30);ctx.quadraticCurveTo(58,36,56,42);ctx.quadraticCurveTo(54,36,54,30);ctx.fill();
+    // Eye sockets — deep-set THPS
+    ctx.fillStyle='rgba(40,20,5,0.25)';ctx.beginPath();ctx.ellipse(33,36,6,5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(45,36,6,5,0,0,Math.PI*2);ctx.fill();
+    // Eyes
+    ctx.fillStyle='#e8e0d0';ctx.beginPath();ctx.ellipse(33,36,4,3,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(45,36,4,3,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2a1a0a';ctx.beginPath();ctx.arc(33,36,2.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(45,36,2.2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(33,36,1.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(45,36,1.2,0,Math.PI*2);ctx.fill();
+    // Under-eye shadow
+    ctx.fillStyle='rgba(80,40,10,0.2)';ctx.beginPath();ctx.ellipse(33,39,4,2,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(45,39,4,2,0,0,Math.PI*2);ctx.fill();
+    // Eyebrows
+    ctx.strokeStyle='#5a3a08';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(29,32);ctx.lineTo(36,31);ctx.stroke();ctx.beginPath();ctx.moveTo(42,31);ctx.lineTo(49,32);ctx.stroke();
+    // Nose + mouth
+    ctx.strokeStyle='#8a6a40';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(39,39);ctx.lineTo(38,44);ctx.stroke();
+    ctx.strokeStyle='#906a40';ctx.beginPath();ctx.moveTo(34,48);ctx.quadraticCurveTo(39,50,44,48);ctx.stroke();
+    // Backwards cap
+    ctx.fillStyle='#8b3a3a';ctx.beginPath();ctx.moveTo(22,28);ctx.quadraticCurveTo(39,18,56,28);ctx.lineTo(56,22);ctx.quadraticCurveTo(39,12,22,22);ctx.fill();
+    // Cap brim — backwards
+    ctx.fillStyle='#6b2a2a';ctx.beginPath();ctx.moveTo(20,29);ctx.quadraticCurveTo(15,26,12,30);ctx.lineTo(14,33);ctx.quadraticCurveTo(16,29,22,30);ctx.fill();
+    ctx.restore();
   }
+
+  function drawSurfer(ctx, x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    // Water underneath
+    ctx.fillStyle='rgba(74,122,122,0.4)';ctx.beginPath();ctx.ellipse(40,198,50,6,0,0,Math.PI*2);ctx.fill();
+    // Surfboard
+    var bg=ctx.createLinearGradient(-10,185,90,185);bg.addColorStop(0,'#d4d0c8');bg.addColorStop(0.5,'#e8e4dc');bg.addColorStop(1,'#d4d0c8');
+    ctx.fillStyle=bg;ctx.beginPath();ctx.moveTo(-10,182);ctx.quadraticCurveTo(-15,185,-5,188);ctx.lineTo(85,188);ctx.quadraticCurveTo(95,185,85,182);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#b5651d';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,185);ctx.lineTo(80,185);ctx.stroke();
+    // Fin
+    ctx.fillStyle='#333';ctx.beginPath();ctx.moveTo(72,188);ctx.lineTo(75,195);ctx.lineTo(78,188);ctx.fill();
+    // Legs — crouched surf stance, board shorts
+    var pg=ctx.createLinearGradient(20,130,20,180);pg.addColorStop(0,'#b5651d');pg.addColorStop(1,'#8b4513');
+    ctx.fillStyle=pg;
+    // Back leg bent
+    ctx.beginPath();ctx.moveTo(25,130);ctx.quadraticCurveTo(18,155,22,178);ctx.lineTo(32,180);ctx.quadraticCurveTo(28,155,35,130);ctx.fill();
+    // Front leg forward
+    ctx.beginPath();ctx.moveTo(45,130);ctx.quadraticCurveTo(55,155,58,178);ctx.lineTo(66,180);ctx.quadraticCurveTo(62,155,52,130);ctx.fill();
+    // Board shorts pattern
+    ctx.strokeStyle='#d4a030';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(22,145);ctx.lineTo(35,145);ctx.stroke();ctx.beginPath();ctx.moveTo(48,145);ctx.lineTo(62,145);ctx.stroke();
+    // Feet
+    ctx.fillStyle='#c89a64';ctx.beginPath();ctx.ellipse(27,180,6,3,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(62,180,6,3,0,0,Math.PI*2);ctx.fill();
+    // Torso — shirtless, tanned
+    var tg=ctx.createLinearGradient(30,55,50,130);tg.addColorStop(0,'#d4a574');tg.addColorStop(0.3,'#c89a64');tg.addColorStop(1,'#b88a5c');
+    ctx.fillStyle=tg;ctx.beginPath();ctx.moveTo(25,65);ctx.quadraticCurveTo(22,95,28,130);ctx.lineTo(52,130);ctx.quadraticCurveTo(58,95,55,65);ctx.closePath();ctx.fill();
+    // Chest/ab definition
+    ctx.strokeStyle='rgba(0,0,0,0.12)';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(40,75);ctx.lineTo(40,115);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(32,85);ctx.lineTo(48,85);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(33,95);ctx.lineTo(47,95);ctx.stroke();
+    // Necklace
+    ctx.strokeStyle='#aaa';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(30,62);ctx.quadraticCurveTo(40,68,50,62);ctx.stroke();
+    ctx.fillStyle='#ddd';ctx.beginPath();ctx.arc(40,68,2,0,Math.PI*2);ctx.fill();
+    // Arms — one reaching forward for balance, one back
+    ctx.fillStyle='#c89a64';ctx.beginPath();ctx.moveTo(25,68);ctx.quadraticCurveTo(8,85,5,70);ctx.lineTo(10,67);ctx.quadraticCurveTo(12,80,28,72);ctx.fill();
+    ctx.fillStyle='#d4a574';ctx.beginPath();ctx.arc(6,68,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#c89a64';ctx.beginPath();ctx.moveTo(55,68);ctx.quadraticCurveTo(72,75,78,65);ctx.lineTo(74,62);ctx.quadraticCurveTo(70,72,53,72);ctx.fill();
+    ctx.fillStyle='#d4a574';ctx.beginPath();ctx.arc(77,64,4,0,Math.PI*2);ctx.fill();
+    // Neck
+    ctx.fillStyle='#b8a888';ctx.fillRect(35,52,10,14);
+    // Head — angular THPS-style
+    var hg=ctx.createLinearGradient(25,16,55,56);hg.addColorStop(0,'#d8c8a8');hg.addColorStop(0.4,'#ccba94');hg.addColorStop(1,'#a89070');
+    ctx.fillStyle=hg;ctx.beginPath();ctx.moveTo(26,50);ctx.quadraticCurveTo(25,57,40,59);ctx.quadraticCurveTo(55,57,54,50);ctx.lineTo(55,28);ctx.quadraticCurveTo(54,15,40,14);ctx.quadraticCurveTo(26,15,25,28);ctx.closePath();ctx.fill();
+    // Cheekbone shadows
+    ctx.fillStyle='rgba(0,0,0,0.1)';ctx.beginPath();ctx.ellipse(29,45,5,3,0.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(51,45,5,3,-0.3,0,Math.PI*2);ctx.fill();
+    // Bleached tips hair
+    ctx.fillStyle='#8b6508';ctx.beginPath();ctx.moveTo(25,30);ctx.quadraticCurveTo(30,14,40,12);ctx.quadraticCurveTo(50,14,55,28);ctx.quadraticCurveTo(48,18,40,16);ctx.quadraticCurveTo(32,18,25,30);ctx.fill();
+    ctx.fillStyle='#c4a530';ctx.beginPath();ctx.moveTo(28,24);ctx.quadraticCurveTo(34,16,42,15);ctx.quadraticCurveTo(36,18,28,26);ctx.fill();
+    ctx.beginPath();ctx.moveTo(48,22);ctx.quadraticCurveTo(44,16,50,18);ctx.quadraticCurveTo(52,20,48,24);ctx.fill();
+    // Eye sockets — deep-set THPS
+    ctx.fillStyle='rgba(40,20,5,0.25)';ctx.beginPath();ctx.ellipse(34,34,5.5,4.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,34,5.5,4.5,0,0,Math.PI*2);ctx.fill();
+    // Eyes
+    ctx.fillStyle='#e8e0d0';ctx.beginPath();ctx.ellipse(34,34,3.5,2.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,34,3.5,2.5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#1a5a6a';ctx.beginPath();ctx.arc(34,34,1.8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(46,34,1.8,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(34,34,0.8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(46,34,0.8,0,Math.PI*2);ctx.fill();
+    // Under-eye shadow
+    ctx.fillStyle='rgba(80,40,10,0.18)';ctx.beginPath();ctx.ellipse(34,37,3.5,2,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,37,3.5,2,0,0,Math.PI*2);ctx.fill();
+    // Eyebrows
+    ctx.strokeStyle='#6b4508';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(30,31);ctx.lineTo(37,30);ctx.stroke();ctx.beginPath();ctx.moveTo(43,30);ctx.lineTo(50,31);ctx.stroke();
+    ctx.strokeStyle='#8a6a40';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(40,38);ctx.lineTo(39,42);ctx.stroke();
+    ctx.strokeStyle='#906a40';ctx.beginPath();ctx.moveTo(36,46);ctx.quadraticCurveTo(40,48,44,46);ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawSkier(ctx, x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    // Skis
+    ctx.fillStyle='#555';ctx.save();ctx.rotate(-0.15);
+    ctx.beginPath();ctx.moveTo(-5,192);ctx.quadraticCurveTo(-8,186,-2,186);ctx.lineTo(85,186);ctx.quadraticCurveTo(90,186,88,192);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(5,198);ctx.quadraticCurveTo(2,192,8,192);ctx.lineTo(95,192);ctx.quadraticCurveTo(100,192,98,198);ctx.closePath();ctx.fill();
+    ctx.restore();
+    // Ski tips
+    ctx.fillStyle='#8b3a3a';ctx.beginPath();ctx.moveTo(-3,186);ctx.quadraticCurveTo(-5,182,-2,182);ctx.lineTo(2,186);ctx.fill();
+    ctx.beginPath();ctx.moveTo(7,192);ctx.quadraticCurveTo(5,188,8,188);ctx.lineTo(12,192);ctx.fill();
+    // Poles
+    ctx.strokeStyle='#888';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(10,75);ctx.lineTo(-15,180);ctx.stroke();ctx.beginPath();ctx.moveTo(70,75);ctx.lineTo(95,180);ctx.stroke();
+    ctx.fillStyle='#666';ctx.beginPath();ctx.arc(-15,182,4,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(95,182,4,0,Math.PI*2);ctx.fill();
+    // Legs — ski pants tucked into boots
+    var pg=ctx.createLinearGradient(20,125,50,180);pg.addColorStop(0,'#2a2a40');pg.addColorStop(1,'#3a3a55');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.moveTo(25,125);ctx.quadraticCurveTo(20,150,22,175);ctx.lineTo(34,178);ctx.quadraticCurveTo(32,150,38,125);ctx.fill();
+    ctx.beginPath();ctx.moveTo(42,125);ctx.quadraticCurveTo(50,150,52,175);ctx.lineTo(62,178);ctx.quadraticCurveTo(58,150,50,125);ctx.fill();
+    // Ski boots
+    ctx.fillStyle='#333';ctx.beginPath();ctx.moveTo(20,173);ctx.lineTo(36,173);ctx.quadraticCurveTo(38,183,18,183);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(50,173);ctx.lineTo(64,173);ctx.quadraticCurveTo(66,183,48,183);ctx.closePath();ctx.fill();
+    // Boot buckles
+    ctx.fillStyle='#aaa';ctx.fillRect(24,175,8,1.5);ctx.fillRect(54,175,8,1.5);
+    // Torso — ski jacket, puffy
+    var jg=ctx.createLinearGradient(20,55,55,125);jg.addColorStop(0,'#8b3a3a');jg.addColorStop(0.4,'#a04545');jg.addColorStop(0.6,'#8b3a3a');jg.addColorStop(1,'#6b2a2a');
+    ctx.fillStyle=jg;ctx.beginPath();ctx.moveTo(18,62);ctx.quadraticCurveTo(14,90,22,125);ctx.lineTo(58,125);ctx.quadraticCurveTo(64,90,60,62);ctx.closePath();ctx.fill();
+    // Jacket zipper
+    ctx.strokeStyle='#ddd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(39,62);ctx.lineTo(40,122);ctx.stroke();
+    // Jacket stripe
+    ctx.strokeStyle='#ddd';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(18,85);ctx.lineTo(60,85);ctx.stroke();
+    // Arms in tuck
+    ctx.fillStyle='#a04545';ctx.beginPath();ctx.moveTo(18,65);ctx.quadraticCurveTo(5,80,8,95);ctx.lineTo(14,95);ctx.quadraticCurveTo(12,80,22,70);ctx.fill();
+    ctx.beginPath();ctx.moveTo(60,65);ctx.quadraticCurveTo(73,80,70,95);ctx.lineTo(64,95);ctx.quadraticCurveTo(66,80,56,70);ctx.fill();
+    // Gloves
+    ctx.fillStyle='#222';ctx.beginPath();ctx.arc(10,96,5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(68,96,5,0,Math.PI*2);ctx.fill();
+    // Neck gaiter
+    ctx.fillStyle='#555';ctx.fillRect(33,50,14,14);
+    // Head — angular THPS-style
+    var hg=ctx.createLinearGradient(25,16,55,52);hg.addColorStop(0,'#d8c8a8');hg.addColorStop(0.5,'#ccba94');hg.addColorStop(1,'#a89070');
+    ctx.fillStyle=hg;ctx.beginPath();ctx.moveTo(26,50);ctx.quadraticCurveTo(25,56,40,58);ctx.quadraticCurveTo(55,56,54,50);ctx.lineTo(55,26);ctx.quadraticCurveTo(54,16,40,15);ctx.quadraticCurveTo(26,16,25,26);ctx.closePath();ctx.fill();
+    // Goggles
+    ctx.fillStyle='#333';ctx.beginPath();ctx.moveTo(24,28);ctx.quadraticCurveTo(24,24,30,24);ctx.lineTo(50,24);ctx.quadraticCurveTo(56,24,56,28);ctx.lineTo(56,34);ctx.quadraticCurveTo(56,38,50,38);ctx.lineTo(30,38);ctx.quadraticCurveTo(24,38,24,34);ctx.closePath();ctx.fill();
+    // Goggle lenses
+    var gg=ctx.createLinearGradient(28,28,38,36);gg.addColorStop(0,'#ff8844');gg.addColorStop(0.5,'#ffaa66');gg.addColorStop(1,'#ff6622');
+    ctx.fillStyle=gg;ctx.beginPath();ctx.ellipse(33,31,6,5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(47,31,6,5,0,0,Math.PI*2);ctx.fill();
+    // Goggle shine
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.ellipse(31,29,2,1.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(45,29,2,1.5,0,0,Math.PI*2);ctx.fill();
+    // Helmet
+    ctx.fillStyle='#444';ctx.beginPath();ctx.moveTo(23,30);ctx.quadraticCurveTo(25,10,40,8);ctx.quadraticCurveTo(55,10,57,30);ctx.quadraticCurveTo(55,22,40,20);ctx.quadraticCurveTo(25,22,23,30);ctx.fill();
+    // Mouth
+    ctx.strokeStyle='#906a40';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(35,43);ctx.quadraticCurveTo(40,45,45,43);ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawPunk(ctx, x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(40,195,30,7,0,0,Math.PI*2);ctx.fill();
+    // Combat boots
+    ctx.fillStyle='#1a1a18';ctx.beginPath();ctx.moveTo(18,175);ctx.lineTo(35,175);ctx.quadraticCurveTo(37,190,15,190);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(48,175);ctx.lineTo(65,175);ctx.quadraticCurveTo(67,190,45,190);ctx.closePath();ctx.fill();
+    // Boot laces
+    ctx.strokeStyle='#888';ctx.lineWidth=0.7;for(var i=0;i<4;i++){ctx.beginPath();ctx.moveTo(22,177+i*3);ctx.lineTo(30,177+i*3);ctx.stroke();ctx.beginPath();ctx.moveTo(52,177+i*3);ctx.lineTo(60,177+i*3);ctx.stroke();}
+    // Legs — tight black jeans
+    ctx.fillStyle='#1a1a22';ctx.beginPath();ctx.moveTo(25,125);ctx.quadraticCurveTo(22,150,20,175);ctx.lineTo(32,175);ctx.quadraticCurveTo(30,150,35,125);ctx.fill();
+    ctx.beginPath();ctx.moveTo(45,125);ctx.quadraticCurveTo(48,150,50,175);ctx.lineTo(62,175);ctx.quadraticCurveTo(58,150,52,125);ctx.fill();
+    // Studded belt
+    ctx.fillStyle='#333';ctx.fillRect(20,122,40,5);
+    ctx.fillStyle='#ccc';for(i=0;i<7;i++)ctx.fillRect(23+i*5,123,2,3);
+    // Torso — band tee
+    var tg=ctx.createLinearGradient(20,62,55,122);tg.addColorStop(0,'#1a1a1a');tg.addColorStop(1,'#111');
+    ctx.fillStyle=tg;ctx.beginPath();ctx.moveTo(20,65);ctx.quadraticCurveTo(18,90,22,122);ctx.lineTo(58,122);ctx.quadraticCurveTo(62,90,58,65);ctx.closePath();ctx.fill();
+    // Band logo — skull-ish
+    ctx.strokeStyle='#ddd';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(40,92,8,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(36,90);ctx.lineTo(37,90);ctx.stroke();ctx.beginPath();ctx.moveTo(43,90);ctx.lineTo(44,90);ctx.stroke();
+    ctx.fillStyle='#ddd';ctx.beginPath();ctx.arc(37,90,1.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(43,90,1.5,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.moveTo(37,95);ctx.lineTo(43,95);ctx.stroke();
+    // Left arm — throwing horns
+    ctx.fillStyle='#1a1a1a';ctx.beginPath();ctx.moveTo(20,68);ctx.quadraticCurveTo(4,80,0,95);ctx.lineTo(8,97);ctx.quadraticCurveTo(10,82,24,72);ctx.fill();
+    ctx.fillStyle='#d4a574';ctx.beginPath();ctx.arc(3,96,4.5,0,Math.PI*2);ctx.fill();
+    // Fingers — horns up
+    ctx.fillStyle='#d4a574';ctx.save();ctx.translate(3,92);ctx.rotate(-0.2);ctx.fillRect(-2,-10,3,10);ctx.fillRect(4,-8,3,8);ctx.restore();
+    // Right arm
+    ctx.fillStyle='#1a1a1a';ctx.beginPath();ctx.moveTo(58,68);ctx.quadraticCurveTo(72,82,75,98);ctx.lineTo(70,100);ctx.quadraticCurveTo(68,82,56,72);ctx.fill();
+    ctx.fillStyle='#d4a574';ctx.beginPath();ctx.arc(73,99,4.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#d4a574';ctx.save();ctx.translate(73,95);ctx.rotate(0.2);ctx.fillRect(-1,-10,3,10);ctx.fillRect(3,-8,3,8);ctx.restore();
+    // Neck
+    ctx.fillStyle='#b8a888';ctx.fillRect(34,50,12,16);
+    // Chain necklace
+    ctx.strokeStyle='#aaa';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(34,56);ctx.quadraticCurveTo(40,62,46,56);ctx.stroke();
+    // Head — angular THPS-style
+    var hg=ctx.createLinearGradient(25,16,55,52);hg.addColorStop(0,'#d8c8a8');hg.addColorStop(0.4,'#ccba94');hg.addColorStop(1,'#a89070');
+    ctx.fillStyle=hg;ctx.beginPath();ctx.moveTo(26,50);ctx.quadraticCurveTo(25,56,40,58);ctx.quadraticCurveTo(55,56,54,50);ctx.lineTo(55,26);ctx.quadraticCurveTo(54,16,40,15);ctx.quadraticCurveTo(26,16,25,26);ctx.closePath();ctx.fill();
+    // Cheekbone shadows
+    ctx.fillStyle='rgba(0,0,0,0.1)';ctx.beginPath();ctx.ellipse(29,44,5,3,0.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(51,44,5,3,-0.3,0,Math.PI*2);ctx.fill();
+    // Mohawk — tall, red
+    for(i=0;i<7;i++){ctx.fillStyle=i%2?'#cc2222':'#aa1818';ctx.beginPath();ctx.moveTo(36+i*1.2,20-i*3);ctx.lineTo(40,8-i*4);ctx.lineTo(44-i*1.2,20-i*3);ctx.fill();}
+    ctx.fillStyle='#cc2222';ctx.beginPath();ctx.moveTo(33,22);ctx.quadraticCurveTo(40,-15,47,22);ctx.quadraticCurveTo(40,18,33,22);ctx.fill();
+    // Piercings
+    ctx.fillStyle='#ccc';ctx.beginPath();ctx.arc(28,36,1.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(36,48,1.2,0,Math.PI*2);ctx.fill();
+    // Eye sockets — deep-set THPS
+    ctx.fillStyle='rgba(40,20,5,0.22)';ctx.beginPath();ctx.ellipse(34,33,5.5,4.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,33,5.5,4.5,0,0,Math.PI*2);ctx.fill();
+    // Eyes — eyeliner
+    ctx.fillStyle='#e8e0d0';ctx.beginPath();ctx.ellipse(34,33,3.5,2.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,33,3.5,2.5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#1a4a1a';ctx.beginPath();ctx.arc(34,33,1.8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(46,33,1.8,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(34,33,0.8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(46,33,0.8,0,Math.PI*2);ctx.fill();
+    // Under-eye shadow
+    ctx.fillStyle='rgba(80,40,10,0.2)';ctx.beginPath();ctx.ellipse(34,36,3.5,2,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,36,3.5,2,0,0,Math.PI*2);ctx.fill();
+    // Eyeliner
+    ctx.strokeStyle='#111';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(30,33);ctx.lineTo(28,31);ctx.stroke();ctx.beginPath();ctx.moveTo(50,33);ctx.lineTo(52,31);ctx.stroke();
+    ctx.strokeStyle='#8a6a40';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(40,37);ctx.lineTo(39,41);ctx.stroke();
+    ctx.strokeStyle='#906a40';ctx.beginPath();ctx.moveTo(35,45);ctx.quadraticCurveTo(40,44,45,45);ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawLifter(ctx, x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(40,195,35,8,0,0,Math.PI*2);ctx.fill();
+    // Barbell
+    ctx.fillStyle='#777';ctx.fillRect(2,8,76,4);
+    // Weight plates
+    ctx.fillStyle='#8b3a3a';ctx.fillRect(-5,0,12,20);ctx.fillRect(73,0,12,20);
+    ctx.fillStyle='#6b2a2a';ctx.fillRect(-2,2,6,16);ctx.fillRect(76,2,6,16);
+    ctx.fillStyle='#555';ctx.fillRect(7,4,6,12);ctx.fillRect(67,4,6,12);
+    // Shoes
+    ctx.fillStyle='#ddd';ctx.beginPath();ctx.moveTo(18,180);ctx.lineTo(35,180);ctx.quadraticCurveTo(37,190,15,190);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(48,180);ctx.lineTo(65,180);ctx.quadraticCurveTo(67,190,45,190);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#b5651d';ctx.fillRect(20,182,12,2);ctx.fillRect(50,182,12,2);
+    // Legs — shorts
+    var pg=ctx.createLinearGradient(20,125,50,180);pg.addColorStop(0,'#333');pg.addColorStop(1,'#222');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.moveTo(25,120);ctx.quadraticCurveTo(20,148,22,165);ctx.lineTo(34,168);ctx.quadraticCurveTo(30,148,36,120);ctx.fill();
+    ctx.beginPath();ctx.moveTo(44,120);ctx.quadraticCurveTo(48,148,50,165);ctx.lineTo(62,168);ctx.quadraticCurveTo(58,148,52,120);ctx.fill();
+    // Exposed calves
+    ctx.fillStyle='#c89a64';ctx.beginPath();ctx.moveTo(22,165);ctx.quadraticCurveTo(24,172,22,180);ctx.lineTo(34,180);ctx.quadraticCurveTo(32,172,34,165);ctx.fill();
+    ctx.beginPath();ctx.moveTo(50,165);ctx.quadraticCurveTo(52,172,50,180);ctx.lineTo(62,180);ctx.quadraticCurveTo(60,172,62,165);ctx.fill();
+    // Torso — tank top, muscular
+    var tg=ctx.createLinearGradient(22,40,58,120);tg.addColorStop(0,'#b5651d');tg.addColorStop(0.5,'#c87530');tg.addColorStop(1,'#a05518');
+    ctx.fillStyle=tg;ctx.beginPath();ctx.moveTo(20,55);ctx.quadraticCurveTo(16,85,22,120);ctx.lineTo(58,120);ctx.quadraticCurveTo(64,85,58,55);ctx.closePath();ctx.fill();
+    // Tank top straps
+    ctx.strokeStyle='#a05518';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(30,55);ctx.lineTo(32,42);ctx.stroke();ctx.beginPath();ctx.moveTo(48,55);ctx.lineTo(46,42);ctx.stroke();
+    // Arms — overhead, holding barbell, muscular
+    ctx.fillStyle='#c89a64';
+    // Left arm
+    ctx.beginPath();ctx.moveTo(20,55);ctx.quadraticCurveTo(5,35,10,15);ctx.lineTo(18,13);ctx.quadraticCurveTo(14,35,24,52);ctx.fill();
+    // Bicep bulge left
+    ctx.beginPath();ctx.arc(12,35,6,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#b88a5c';ctx.beginPath();ctx.arc(12,35,6,0.5,Math.PI+0.5);ctx.fill();
+    ctx.fillStyle='#c89a64';
+    // Right arm
+    ctx.beginPath();ctx.moveTo(58,55);ctx.quadraticCurveTo(73,35,68,15);ctx.lineTo(62,13);ctx.quadraticCurveTo(66,35,56,52);ctx.fill();
+    ctx.beginPath();ctx.arc(66,35,6,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#b88a5c';ctx.beginPath();ctx.arc(66,35,6,-0.5,Math.PI-0.5);ctx.fill();
+    // Hands gripping bar
+    ctx.fillStyle='#d4a574';ctx.beginPath();ctx.arc(14,12,5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(66,12,5,0,Math.PI*2);ctx.fill();
+    // Neck — thick
+    ctx.fillStyle='#b8a888';ctx.fillRect(33,38,14,16);
+    // Head — angular THPS-style, grimacing
+    var hg=ctx.createLinearGradient(26,12,54,46);hg.addColorStop(0,'#d8c8a8');hg.addColorStop(0.4,'#ccba94');hg.addColorStop(1,'#a89070');
+    ctx.fillStyle=hg;ctx.beginPath();ctx.moveTo(27,42);ctx.quadraticCurveTo(26,48,40,50);ctx.quadraticCurveTo(54,48,53,42);ctx.lineTo(54,22);ctx.quadraticCurveTo(53,12,40,11);ctx.quadraticCurveTo(27,12,26,22);ctx.closePath();ctx.fill();
+    // Cheekbone shadows
+    ctx.fillStyle='rgba(0,0,0,0.1)';ctx.beginPath();ctx.ellipse(29,38,5,3,0.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(51,38,5,3,-0.3,0,Math.PI*2);ctx.fill();
+    // Buzz cut hair
+    ctx.fillStyle='#4a3a18';ctx.beginPath();ctx.moveTo(26,22);ctx.quadraticCurveTo(28,10,40,8);ctx.quadraticCurveTo(52,10,54,22);ctx.quadraticCurveTo(48,14,40,13);ctx.quadraticCurveTo(32,14,26,22);ctx.fill();
+    // Eye sockets — deep-set, strained
+    ctx.fillStyle='rgba(40,20,5,0.25)';ctx.beginPath();ctx.ellipse(34,26,5,4,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,26,5,4,0,0,Math.PI*2);ctx.fill();
+    // Eyes — strained
+    ctx.fillStyle='#e8e0d0';ctx.beginPath();ctx.ellipse(34,26,3,2.5,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,26,3,2.5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2a1a0a';ctx.beginPath();ctx.arc(34,26,1.8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(46,26,1.8,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(34,26,1,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(46,26,1,0,Math.PI*2);ctx.fill();
+    // Under-eye shadow
+    ctx.fillStyle='rgba(80,40,10,0.2)';ctx.beginPath();ctx.ellipse(34,29,3,2,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(46,29,3,2,0,0,Math.PI*2);ctx.fill();
+    // Eyebrows — furrowed
+    ctx.strokeStyle='#3a2a0a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(30,22);ctx.lineTo(37,23);ctx.stroke();ctx.beginPath();ctx.moveTo(43,23);ctx.lineTo(50,22);ctx.stroke();
+    // Grimace
+    ctx.strokeStyle='#906a40';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(34,35);ctx.quadraticCurveTo(37,33,40,35);ctx.quadraticCurveTo(43,33,46,35);ctx.stroke();
+    // Sweat drops
+    ctx.fillStyle='rgba(150,200,255,0.5)';ctx.beginPath();ctx.ellipse(56,22,1.5,3,0.3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(24,25,1,2.5,-0.3,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+
+  const CHAR_FUNCS = {
+    'tab-dashboard': [drawSkater, drawPunk],
+    'tab-meals': [drawSurfer, drawSkater],
+    'tab-exercise': [drawSkier, drawSurfer],
+    'tab-weight': [drawLifter, drawPunk],
+  };
 
   function applyMoss(card, seed, tabId) {
     if (card.querySelector('.moss-overlay')) return;
     const canvas = genMoss(seed);
     const ctx = canvas.getContext('2d');
 
-    // Draw character sprite — big, prominent, in the right side of the card
-    const sprites = SPRITES[tabId];
-    if (sprites) {
-      const sprite = sprites[seed % sprites.length];
-      const scale = 6;
-      const spriteW = sprite[0].length * scale;
-      const spriteH = sprite.length * scale;
-      const sx = W - spriteW - 15;
-      const sy = H - spriteH - 10;
+    // Draw HD character in bottom-right
+    const funcs = CHAR_FUNCS[tabId];
+    if (funcs) {
+      const drawFn = funcs[seed % funcs.length];
+      const charScale = 1.4;
+      const cx = W - 80 * charScale - 10;
+      const cy = H - 200 * charScale + 10;
       // Drop shadow
-      ctx.globalAlpha = 0.35;
-      drawSprite(ctx, sprite, sx + 4, sy + 4, scale);
-      // Main character — much more visible
-      ctx.globalAlpha = 0.6;
-      drawSprite(ctx, sprite, sx, sy, scale);
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.filter = 'blur(3px)';
+      drawFn(ctx, cx + 5, cy + 5, charScale);
+      ctx.restore();
+      // Main character
+      ctx.globalAlpha = 0.55;
+      drawFn(ctx, cx, cy, charScale);
       ctx.globalAlpha = 1;
     }
 
