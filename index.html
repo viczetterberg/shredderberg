@@ -4,6 +4,56 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Shredderberg</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="berg">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#b5651d">
+<script>
+(function(){
+  var c=document.createElement('canvas');c.width=c.height=512;
+  var x=c.getContext('2d');
+  // Dark background
+  x.fillStyle='#1a1a18';x.fillRect(0,0,512,512);
+  // Orange border stripes — THUG-style frame
+  x.fillStyle='#b5651d';x.fillRect(0,0,512,22);x.fillRect(0,490,512,22);
+  x.fillRect(0,0,22,512);x.fillRect(490,0,22,512);
+  // Inner dark inset
+  x.fillStyle='#252521';x.fillRect(22,22,468,468);
+  // Grunge noise
+  for(var i=0;i<600;i++){x.fillStyle='rgba(255,255,255,0.025)';x.fillRect(Math.random()*512,Math.random()*512,Math.random()*3+1,Math.random()*2+1);}
+  for(i=0;i<200;i++){x.fillStyle='rgba(0,0,0,0.15)';x.fillRect(Math.random()*512,Math.random()*512,Math.random()*4+1,1);}
+  // Diagonal scratch marks
+  x.save();x.strokeStyle='rgba(0,0,0,0.35)';x.lineWidth=2;
+  for(i=0;i<4;i++){x.beginPath();var sx=80+i*90;x.moveTo(sx,80);x.lineTo(sx+55,430);x.stroke();}
+  x.restore();
+  // "BERG" — THUG Underground logo style
+  x.save();x.textAlign='center';x.textBaseline='middle';
+  // Drop shadow
+  x.font='bold italic 218px Impact,"Arial Narrow",Arial,sans-serif';
+  x.fillStyle='rgba(0,0,0,0.6)';x.fillText('BERG',260,264);
+  // Orange outer stroke
+  x.strokeStyle='#8b4010';x.lineWidth=20;x.strokeText('BERG',256,256);
+  // Bright orange mid stroke
+  x.strokeStyle='#b5651d';x.lineWidth=10;x.strokeText('BERG',256,256);
+  // Main fill — off-white like the THUG logo
+  x.fillStyle='#d4d0c8';x.fillText('BERG',256,256);
+  // Fine inner edge highlight
+  x.strokeStyle='rgba(255,255,255,0.15)';x.lineWidth=2;x.strokeText('BERG',256,256);
+  x.restore();
+  // Bottom label — "SHREDDERBERG" small, like THUG subtitle
+  x.save();x.textAlign='center';x.font='bold 28px Impact,"Arial Narrow",Arial,sans-serif';
+  x.fillStyle='#b5651d';x.fillText('SHREDDERBERG',256,450);x.restore();
+  var url=c.toDataURL('image/png');
+  // apple-touch-icon
+  var l=document.createElement('link');l.rel='apple-touch-icon';l.href=url;document.head.appendChild(l);
+  // favicon
+  var f=document.createElement('link');f.rel='icon';f.type='image/png';f.href=url;document.head.appendChild(f);
+  // web manifest for Android PWA
+  var m=JSON.stringify({name:'Shredderberg',short_name:'berg',start_url:'.',display:'standalone',background_color:'#1a1a18',theme_color:'#b5651d',icons:[{src:url,sizes:'512x512',type:'image/png',purpose:'any maskable'}]});
+  var ml=document.createElement('link');ml.rel='manifest';ml.href='data:application/manifest+json,'+encodeURIComponent(m);document.head.appendChild(ml);
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root {
