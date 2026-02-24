@@ -2018,21 +2018,193 @@ document.addEventListener('visibilitychange', () => {
     }
 
     ctx.putImageData(img, 0, 0);
-    return c.toDataURL();
+    return c;
   }
 
-  function applyMoss(card, seed) {
+  // Pixel art sprites — each row is a line of pixels, chars map to colors
+  // . = transparent, K = black outline, S = skin, H = hair, T = shirt, P = pants, W = white, O = shoe, B = board/prop
+  const PAL = {
+    K:[0x1a,0x1a,0x18],S:[0xd4,0xa5,0x74],H:[0x8b,0x65,0x08],T:[0xb5,0x65,0x1d],
+    P:[0x3a,0x3a,0x50],W:[0xd4,0xd0,0xc8],O:[0x2a,0x2a,0x22],B:[0x6b,0x8e,0x23],
+    R:[0x8b,0x3a,0x3a],G:[0x6b,0x8e,0x8e],Y:[0xb5,0x95,0x1d],C:[0x5a,0x5a,0x50],
+    F:[0x46,0x38,0x24],E:[0xd4,0xd0,0xc8],L:[0x7a,0x77,0x6e],M:[0x52,0x44,0x30]
+  };
+
+  // Skater doing a kickflip
+  const SKATER = [
+    '....KK....',
+    '...KHHK...',
+    '..KHHHHK..',
+    '..KSSK....',
+    '..KSSK....',
+    '.KTTTTK...',
+    '.KTTTTK...',
+    'KTTTTTTK..',
+    '..KSSKK...',
+    '.KPPKPPK..',
+    '.KPPK.KPK.',
+    'KPPK...KPK',
+    'KOKK...KOK',
+    'KOK.....KK',
+    '.KK.......',
+    'KBBBBBBBBK',
+    'KBBBBBBBBK',
+    '.KKKKKKKK.',
+  ];
+
+  // Surfer riding a wave
+  const SURFER = [
+    '.....KK...',
+    '....KHHK..',
+    '...KHHHHK.',
+    '...KSSK...',
+    '..KSSSK...',
+    '.KTTTTK...',
+    '.KTTTTKK..',
+    'KTTK.KTTK.',
+    'KSK...KSK.',
+    'KPPK..KPK.',
+    '.KPPK.KPK.',
+    '..KOKKOK..',
+    '..KOK.KOK.',
+    'KBBBBBBBBK',
+    'KBBBBBBBBK',
+    'GKKKKKKKKG',
+    'GGGGGGGGGG',
+    'GGGGGGGGG.',
+  ];
+
+  // Skier going downhill
+  const SKIER = [
+    '...KK.....',
+    '..KWWK....',
+    '..KWWK....',
+    '..KSSK....',
+    '.KRRRRK...',
+    '.KRRRRK...',
+    'KRRRRRRK..',
+    '..KPPK....',
+    '.KPPKPPK..',
+    '.KPPK.KPK.',
+    'KOKK..KOKK',
+    'KOK....KOK',
+    'KBBBBBBBBK',
+    'KBBBBBBBBK',
+    'K........K',
+    '.K......K.',
+  ];
+
+  // Punk dude with mohawk giving horns
+  const PUNK = [
+    '..K.K.K...',
+    '..KHKHK...',
+    '.KHHHHK...',
+    '.KSSHSK...',
+    '.KSSSKK...',
+    'KYYYYYYK..',
+    'KYYYYKYK..',
+    '.KYYYKKYK.',
+    '..KSSKK...',
+    '.KPPKPPK..',
+    '.KPPK.KPK.',
+    'KPPK...KPK',
+    'KOKK...KOK',
+    'KOK.....KK',
+    '.KK.......',
+  ];
+
+  // Food dude (chef/eating) for meals tab
+  const CHEF = [
+    '..KWWWK...',
+    '..KWWWK...',
+    '.KWWWWWK..',
+    '..KSSK....',
+    '..KSSK....',
+    '.KEEEEK...',
+    '.KEEEEKK..',
+    'KEEK.KEEK.',
+    'KSK...KSK.',
+    '.KPPKPPK..',
+    '..KPPKPK..',
+    '..KOKKOK..',
+    '..KOK.KOK.',
+    '...KK..KK.',
+  ];
+
+  // Weightlifter for weight tab
+  const LIFTER = [
+    'KCK.KK.KCK',
+    'KCK.KK.KCK',
+    'KCKKSSKCKCK',
+    '.KKKSKKK...',
+    '..KTTTTK...',
+    '..KTTTTK...',
+    '.KTTTTTTK..',
+    '..KPPPPK...',
+    '..KPPPPK...',
+    '.KPK..KPK..',
+    '.KPK..KPK..',
+    'KOKK..KOKK.',
+    'KOK....KOK.',
+    '.KK....KK..',
+  ];
+
+  const SPRITES = {
+    'tab-dashboard': [SKATER, PUNK],
+    'tab-meals': [CHEF, SURFER],
+    'tab-exercise': [SKIER, SKATER],
+    'tab-weight': [LIFTER, PUNK],
+  };
+
+  function drawSprite(ctx, sprite, px, py, scale) {
+    for (let row = 0; row < sprite.length; row++) {
+      for (let col = 0; col < sprite[row].length; col++) {
+        const ch = sprite[row][col];
+        if (ch === '.' || !PAL[ch]) continue;
+        const c = PAL[ch];
+        // Add slight per-pixel variation for that hand-drawn look
+        const v = ((row * 7 + col * 13) % 5) - 2;
+        ctx.fillStyle = `rgb(${c[0]+v},${c[1]+v},${c[2]+v})`;
+        ctx.fillRect(px + col * scale, py + row * scale, scale, scale);
+      }
+    }
+  }
+
+  function applyMoss(card, seed, tabId) {
     if (card.querySelector('.moss-overlay')) return;
-    const url = genMoss(seed);
+    const canvas = genMoss(seed);
+    const ctx = canvas.getContext('2d');
+
+    // Draw character sprite in bottom-right area, above the moss
+    const sprites = SPRITES[tabId];
+    if (sprites) {
+      const sprite = sprites[seed % sprites.length];
+      const scale = 4;
+      const spriteW = sprite[0].length * scale;
+      const spriteH = sprite.length * scale;
+      const sx = W - spriteW - 30 - ((seed * 17) % 40);
+      const sy = H - spriteH - 30 - ((seed * 13) % 20);
+      // Draw slight shadow
+      ctx.globalAlpha = 0.2;
+      drawSprite(ctx, sprite, sx + 3, sy + 3, scale);
+      // Draw character
+      ctx.globalAlpha = 0.25;
+      drawSprite(ctx, sprite, sx, sy, scale);
+      ctx.globalAlpha = 1;
+    }
+
+    const url = canvas.toDataURL();
     const overlay = document.createElement('div');
     overlay.className = 'moss-overlay';
     card.insertBefore(overlay, card.firstChild);
-    // Set background after inserting to avoid selector issues
     overlay.style.backgroundImage = 'url('+url+')';
   }
 
-  // Generate unique texture per card
-  document.querySelectorAll('.card').forEach((card, i) => applyMoss(card, i * 7 + 42));
+  // Generate unique texture per card, pass tab context
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    const tabId = tab.id;
+    tab.querySelectorAll('.card').forEach((card, i) => applyMoss(card, i * 7 + 42, tabId));
+  });
 
   // Re-apply when tabs switch (for dynamically visible cards)
   let mossTimer = null;
@@ -2040,7 +2212,10 @@ document.addEventListener('visibilitychange', () => {
     if (mossTimer) return;
     mossTimer = setTimeout(() => {
       mossTimer = null;
-      document.querySelectorAll('.card').forEach((card, i) => applyMoss(card, i * 7 + 42));
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        const tabId = tab.id;
+        tab.querySelectorAll('.card').forEach((card, i) => applyMoss(card, i * 7 + 42, tabId));
+      });
     }, 100);
   });
   obs.observe(document.querySelector('.app'), { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
