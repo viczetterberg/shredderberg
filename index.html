@@ -2022,136 +2022,200 @@ document.addEventListener('visibilitychange', () => {
   }
 
   // Pixel art sprites — each row is a line of pixels, chars map to colors
-  // . = transparent, K = black outline, S = skin, H = hair, T = shirt, P = pants, W = white, O = shoe, B = board/prop
+  // . = transparent, K = black, S = skin, H = hair, T = shirt, P = pants
+  // W = white, O = shoe, B = board/green, R = red, G = teal, Y = yellow
+  // C = gray, D = dark skin shadow, N = nose/mouth, V = visor/accessory
+  // A = alt color accent, Q = strap/belt, Z = highlight, I = inner shade
   const PAL = {
-    K:[0x1a,0x1a,0x18],S:[0xd4,0xa5,0x74],H:[0x8b,0x65,0x08],T:[0xb5,0x65,0x1d],
-    P:[0x3a,0x3a,0x50],W:[0xd4,0xd0,0xc8],O:[0x2a,0x2a,0x22],B:[0x6b,0x8e,0x23],
-    R:[0x8b,0x3a,0x3a],G:[0x6b,0x8e,0x8e],Y:[0xb5,0x95,0x1d],C:[0x5a,0x5a,0x50],
-    F:[0x46,0x38,0x24],E:[0xd4,0xd0,0xc8],L:[0x7a,0x77,0x6e],M:[0x52,0x44,0x30]
+    K:[0x12,0x12,0x10],S:[0xd4,0xa5,0x74],D:[0xb8,0x8a,0x5c],H:[0x8b,0x65,0x08],
+    T:[0xb5,0x65,0x1d],I:[0x96,0x52,0x16],P:[0x3a,0x3a,0x50],W:[0xd4,0xd0,0xc8],
+    O:[0x2a,0x2a,0x22],B:[0x6b,0x8e,0x23],R:[0x8b,0x3a,0x3a],G:[0x4a,0x7a,0x7a],
+    Y:[0xb5,0x95,0x1d],C:[0x5a,0x5a,0x50],N:[0xb0,0x80,0x58],V:[0x6b,0x8e,0x8e],
+    A:[0xd4,0x55,0x1d],Q:[0x46,0x38,0x24],Z:[0xe8,0xd0,0xa0],L:[0x7a,0x77,0x6e],
+    E:[0xd4,0xd0,0xc8],M:[0x52,0x44,0x30],F:[0x46,0x38,0x24]
   };
 
-  // Skater doing a kickflip
+  // Skater mid-kickflip — baggy clothes, backwards cap, arms out
   const SKATER = [
-    '....KK....',
-    '...KHHK...',
-    '..KHHHHK..',
-    '..KSSK....',
-    '..KSSK....',
-    '.KTTTTK...',
-    '.KTTTTK...',
-    'KTTTTTTK..',
-    '..KSSKK...',
-    '.KPPKPPK..',
-    '.KPPK.KPK.',
-    'KPPK...KPK',
-    'KOKK...KOK',
-    'KOK.....KK',
-    '.KK.......',
-    'KBBBBBBBBK',
-    'KBBBBBBBBK',
-    '.KKKKKKKK.',
+    '......KKKK..........',
+    '.....KHHHHK.........',
+    '....KHHHHHKK........',
+    '....KHHHHHHK........',
+    '...KKKHHKKKK........',
+    '...KSSDSSK..........',
+    '...KSSNSSKK.........',
+    '...KKSSSKK..........',
+    '..KTTTTTTTTK........',
+    '..KTTIIIITTK........',
+    '.KTTTIIIITTTK.......',
+    '.KTTTTTTTTTTK.......',
+    'KTTTTTTTTTTTTKK.....',
+    'KSSKK...KKTTKKSK....',
+    '.KSK.....KKKKSSK....',
+    '..KK......KSSKK.....',
+    '..KPPPPPPPPK........',
+    '.KPPPPPPPPPKK.......',
+    '.KPPPKKKPPPPK.......',
+    'KPPPK...KPPPK.......',
+    'KPPK.....KPPK.......',
+    'KOKK......KOKK......',
+    'KOOKK.....KOOKK.....',
+    'KKKKK......KKKKK....',
+    '..KBBBBBBBBBBBBK....',
+    '.KBBBBBBBBBBBBBBK...',
+    '.KBKBKBKBKBKBKBBK...',
+    '..KKKKKKKKKKKKKKKK..',
   ];
 
-  // Surfer riding a wave
+  // Surfer crouching on board riding a wave — board shorts, no shirt
   const SURFER = [
-    '.....KK...',
-    '....KHHK..',
-    '...KHHHHK.',
-    '...KSSK...',
-    '..KSSSK...',
-    '.KTTTTK...',
-    '.KTTTTKK..',
-    'KTTK.KTTK.',
-    'KSK...KSK.',
-    'KPPK..KPK.',
-    '.KPPK.KPK.',
-    '..KOKKOK..',
-    '..KOK.KOK.',
-    'KBBBBBBBBK',
-    'KBBBBBBBBK',
-    'GKKKKKKKKG',
-    'GGGGGGGGGG',
-    'GGGGGGGGG.',
+    '.......KKKK.........',
+    '......KHHHHK........',
+    '.....KHHHHHKK.......',
+    '.....KHHHHHHK.......',
+    '....KKSSDSKKK.......',
+    '....KSSNSSK.........',
+    '....KKSDSSKK........',
+    '...KSSDDSSDSK.......',
+    '..KKSSDDSSDSKK......',
+    '..KSSDDDDDDSSKK....',
+    '.KSK.KDDDDKK.KSK...',
+    '.KK..KDDDDKK..KK...',
+    '.....KPPPPK.........',
+    '....KPPPPPPK........',
+    '...KPPAPPPPK........',
+    '...KPPAPPAPK........',
+    '..KPPK..KPPK........',
+    '..KOK....KOK........',
+    '..KOK....KOKK.......',
+    '..KKK.....KKK.......',
+    'KBBBBBBBBBBBBBBBBK..',
+    'KBBBBBBBBBBBBBBBBKK.',
+    'KBKBKBKBKBKBKBKBBKK',
+    '.KKKKKKKKKKKKKKKKKK.',
+    'GGGGGGGGGGGGGGGGGGGG',
+    'KGKGGKGGGKGGKGGGKGG',
+    'GGGGGGGGGGGGGGGGGGGG',
+    '.GGGGGGGGGGGGGGGGG..',
   ];
 
-  // Skier going downhill
+  // Skier in tuck position — goggles, jacket, poles out behind
   const SKIER = [
-    '...KK.....',
-    '..KWWK....',
-    '..KWWK....',
-    '..KSSK....',
-    '.KRRRRK...',
-    '.KRRRRK...',
-    'KRRRRRRK..',
-    '..KPPK....',
-    '.KPPKPPK..',
-    '.KPPK.KPK.',
-    'KOKK..KOKK',
-    'KOK....KOK',
-    'KBBBBBBBBK',
-    'KBBBBBBBBK',
-    'K........K',
-    '.K......K.',
+    '......KKKK..........',
+    '.....KVVVVK.........',
+    '....KVVVVVVK........',
+    '....KVVVVVVK........',
+    '...KKSSDSKKK........',
+    '...KSSNSSK..........',
+    '...KKSSSSKK.........',
+    '..KRRRRRRRRKK.......',
+    '..KRRRIIIIRRKK......',
+    '.KRRRRIIIIRRRK......',
+    '.KRRRRRRRRRRRKK.....',
+    'KRRRRRRRRRRRRRKK....',
+    'KSSKK....KKRRKKSK...',
+    '.KSK......KKKSSK....',
+    '..KPPPPPPPPPPK......',
+    '.KPPPPPPPPPPPK......',
+    '.KPPPKKKKPPPPK......',
+    'KPPPK....KPPPK.....',
+    'KPPK......KPPK.....',
+    'KOKK.......KOKK....',
+    'KOOKK......KOOKK...',
+    'KKKKK.......KKKKK..',
+    'KBBBBBBBBBBBBBBBBK..',
+    'KBBBBBBBBBBBBBBBBKK.',
+    'K..................K',
+    '.K................K.',
+    '..K..............K..',
   ];
 
-  // Punk dude with mohawk giving horns
+  // Punk with tall mohawk, studded vest, combat boots, throwing horns
   const PUNK = [
-    '..K.K.K...',
-    '..KHKHK...',
-    '.KHHHHK...',
-    '.KSSHSK...',
-    '.KSSSKK...',
-    'KYYYYYYK..',
-    'KYYYYKYK..',
-    '.KYYYKKYK.',
-    '..KSSKK...',
-    '.KPPKPPK..',
-    '.KPPK.KPK.',
-    'KPPK...KPK',
-    'KOKK...KOK',
-    'KOK.....KK',
-    '.KK.......',
+    '.....KRK............',
+    '....KRKRK...........',
+    '....KRHRKK..........',
+    '...KRHHHRKK.........',
+    '...KRHHHRK..........',
+    '...KHHHHKK..........',
+    '..KKSSDSKKK.........',
+    '..KSSNSSK...........',
+    '..KKSSSSKK..........',
+    '.KKKKKKKKKK.........',
+    '.KKYYKKYYKK.........',
+    'KKYYYKKYYYKK........',
+    'KKYYYYYYYYYYKKK.....',
+    '.KKQQQQQQQKK.KSK...',
+    '..KSSKK..KK..KSSK..',
+    '..KSKK....K..KKSK..',
+    '..KPPPPPPPPPK..KK...',
+    '.KPPPPPPPPPPPK......',
+    '.KPPPPKKKKPPPK......',
+    'KPPPK.....KPPPK....',
+    'KPPK.......KPPK....',
+    'KOOKK......KOOKK...',
+    'KOOOKK.....KOOOKK..',
+    'KKKKKK......KKKKKK.',
   ];
 
-  // Food dude (chef/eating) for meals tab
-  const CHEF = [
-    '..KWWWK...',
-    '..KWWWK...',
-    '.KWWWWWK..',
-    '..KSSK....',
-    '..KSSK....',
-    '.KEEEEK...',
-    '.KEEEEKK..',
-    'KEEK.KEEK.',
-    'KSK...KSK.',
-    '.KPPKPPK..',
-    '..KPPKPK..',
-    '..KOKKOK..',
-    '..KOK.KOK.',
-    '...KK..KK.',
+  // Dude eating a burger for meals tab — backwards cap, big burger
+  const EATER = [
+    '......KKKK..........',
+    '.....KHHHHK.........',
+    '....KHHHHHHK........',
+    '....KKHHKKKK........',
+    '...KSSDSSK..........',
+    '...KSSNSSKK.........',
+    '...KKSSKKKK.........',
+    'KKKKK.KSSK..........',
+    'KYYZYK.KSK..........',
+    'KYZYZK..KK..........',
+    'KRRYRK..............',
+    'KBYRYKK.............',
+    'KYYZYK..............',
+    'KKKKKKK.............',
+    '..KTTTTTTTTK........',
+    '..KTTIIIITTK........',
+    '.KTTTIIIITTTK.......',
+    '.KTTTTTTTTTTK.......',
+    '..KPPPPPPPK.........',
+    '.KPPPPPPPPKK........',
+    '.KPPPKKKPPPK........',
+    'KPPK.....KPPK......',
+    'KOKK......KOKK.....',
+    'KOOKK.....KOOKK....',
+    'KKKKK......KKKKK...',
   ];
 
-  // Weightlifter for weight tab
+  // Weightlifter — muscular, barbell overhead, tank top
   const LIFTER = [
-    'KCK.KK.KCK',
-    'KCK.KK.KCK',
-    'KCKKSSKCKCK',
-    '.KKKSKKK...',
-    '..KTTTTK...',
-    '..KTTTTK...',
-    '.KTTTTTTK..',
-    '..KPPPPK...',
-    '..KPPPPK...',
-    '.KPK..KPK..',
-    '.KPK..KPK..',
-    'KOKK..KOKK.',
-    'KOK....KOK.',
-    '.KK....KK..',
+    'KCKK..KKKK..KKCK...',
+    'KCKK..KKKK..KKCK...',
+    'KCKKKKSSKKKKKKCK....',
+    'KCKK.KSSSKK.KKCK...',
+    '.KK..KSSSSKK..KK...',
+    '.....KSSNSSK........',
+    '.....KKSSSSKK.......',
+    '....KTTTTTTTTK......',
+    '...KTTTIIIITTTK.....',
+    '...KTTTTTTTTTTK.....',
+    '..KTTTTTTTTTTTTKK...',
+    '..KDSSK.KKTTKKDSK...',
+    '...KDSK..KKK.KDSK..',
+    '...KKSK.......KSKK.',
+    '....KPPPPPPPPPK.....',
+    '...KPPPPPPPPPPKK....',
+    '...KPPPKKKKPPPPK....',
+    '..KPPPK....KPPPK...',
+    '..KPPK......KPPK...',
+    '.KOKK........KOKK..',
+    '.KOOKK.......KOOKK.',
+    '.KKKKK........KKKKK',
   ];
 
   const SPRITES = {
     'tab-dashboard': [SKATER, PUNK],
-    'tab-meals': [CHEF, SURFER],
+    'tab-meals': [EATER, SURFER],
     'tab-exercise': [SKIER, SKATER],
     'tab-weight': [LIFTER, PUNK],
   };
@@ -2162,9 +2226,8 @@ document.addEventListener('visibilitychange', () => {
         const ch = sprite[row][col];
         if (ch === '.' || !PAL[ch]) continue;
         const c = PAL[ch];
-        // Add slight per-pixel variation for that hand-drawn look
-        const v = ((row * 7 + col * 13) % 5) - 2;
-        ctx.fillStyle = `rgb(${c[0]+v},${c[1]+v},${c[2]+v})`;
+        const v = ((row * 7 + col * 13) % 7) - 3;
+        ctx.fillStyle = `rgb(${Math.max(0,c[0]+v)},${Math.max(0,c[1]+v)},${Math.max(0,c[2]+v)})`;
         ctx.fillRect(px + col * scale, py + row * scale, scale, scale);
       }
     }
@@ -2175,20 +2238,20 @@ document.addEventListener('visibilitychange', () => {
     const canvas = genMoss(seed);
     const ctx = canvas.getContext('2d');
 
-    // Draw character sprite in bottom-right area, above the moss
+    // Draw character sprite — big, prominent, in the right side of the card
     const sprites = SPRITES[tabId];
     if (sprites) {
       const sprite = sprites[seed % sprites.length];
-      const scale = 4;
+      const scale = 6;
       const spriteW = sprite[0].length * scale;
       const spriteH = sprite.length * scale;
-      const sx = W - spriteW - 30 - ((seed * 17) % 40);
-      const sy = H - spriteH - 30 - ((seed * 13) % 20);
-      // Draw slight shadow
-      ctx.globalAlpha = 0.2;
-      drawSprite(ctx, sprite, sx + 3, sy + 3, scale);
-      // Draw character
-      ctx.globalAlpha = 0.25;
+      const sx = W - spriteW - 15;
+      const sy = H - spriteH - 10;
+      // Drop shadow
+      ctx.globalAlpha = 0.35;
+      drawSprite(ctx, sprite, sx + 4, sy + 4, scale);
+      // Main character — much more visible
+      ctx.globalAlpha = 0.6;
       drawSprite(ctx, sprite, sx, sy, scale);
       ctx.globalAlpha = 1;
     }
