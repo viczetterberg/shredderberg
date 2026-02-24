@@ -102,7 +102,14 @@ nav button svg { width: 22px; height: 22px; }
   background-size: 48px 24px;
   z-index: 0;
 }
-.card > * { position: relative; z-index: 1; }
+.moss-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.card > *:not(.moss-overlay) { position: relative; z-index: 1; }
 
 h1 { font-family: 'Press Start 2P', monospace; font-size: 16px; font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); text-shadow: 2px 2px 0 #3a3a30, 0 0 8px rgba(181,101,29,0.3); }
 h2 { font-family: 'Press Start 2P', monospace; font-size: 12px; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; }
@@ -1868,7 +1875,7 @@ document.addEventListener('visibilitychange', () => {
     [0x54,0x72,0x28],[0x5a,0x7a,0x2c],[0x5e,0x7e,0x2e],[0x62,0x84,0x30],
     [0x6b,0x8e,0x23],[0x74,0x96,0x34]
   ];
-  const dirt = [[0x36,0x2c,0x1a],[0x40,0x35,0x20],[0x4a,0x3c,0x28],[0x52,0x44,0x30]];
+  const dirt = [[0x2e,0x24,0x14],[0x36,0x2c,0x1a],[0x3c,0x30,0x1e],[0x40,0x35,0x20],[0x4a,0x3c,0x28],[0x52,0x44,0x30],[0x58,0x48,0x32],[0x46,0x38,0x24]];
   const lichen = [[0x44,0x50,0x38],[0x50,0x5e,0x42],[0x56,0x66,0x48],[0x68,0x78,0x60]];
   const wet = [[0x1a,0x26,0x0c],[0x12,0x1c,0x08]];
 
@@ -1971,17 +1978,29 @@ document.addEventListener('visibilitychange', () => {
       const blend = n1*0.4 + n2*0.35 + n3*0.25;
 
       let col;
+      // More dirt in dense moss areas + scattered throughout
+      const dirtChance = g > 0.4 ? 0.18 : (g > 0.2 ? 0.12 : 0.06);
       if (g < 0.1 && n1 > 0.6) {
-        col = lichen[blend * lichen.length | 0]; // crusty lichen
-      } else if (n1 > 0.92) {
-        col = dirt[blend * dirt.length | 0]; // dirt flecks
+        col = lichen[blend * lichen.length | 0];
+      } else if (n1 > (1 - dirtChance)) {
+        // Dirt: muddy browns, clumpy soil
+        const di = (blend * dirt.length) | 0;
+        col = dirt[di];
+        // Clumpy dirt patches — if neighbors are also dirt, darken
+        const neighborDirt = hash(x+1,y,seed+30) > (1 - dirtChance) || hash(x,y+1,seed+30) > (1 - dirtChance);
+        if (neighborDirt && n2 > 0.5) col = [col[0]-8, col[1]-6, col[2]-4];
       } else if (n1 < 0.04) {
-        col = wet[blend * wet.length | 0]; // wet dark spots
+        col = wet[blend * wet.length | 0];
       } else {
-        // Main moss: darker at edges/shadows, brighter at centers
         const brightness = g * 0.5 + blend * 0.5;
         const ci = Math.min(moss.length - 1, (brightness * moss.length) | 0);
         col = moss[ci];
+        // Mix dirt into moss at transitions (where growth is medium)
+        if (g > 0.15 && g < 0.5 && n2 > 0.75) {
+          const dc = dirt[(blend * dirt.length) | 0];
+          const mix = n2 * 0.4;
+          col = [col[0]*(1-mix)+dc[0]*mix, col[1]*(1-mix)+dc[1]*mix, col[2]*(1-mix)+dc[2]*mix];
+        }
       }
 
       // Per-pixel color variation
@@ -2002,24 +2021,27 @@ document.addEventListener('visibilitychange', () => {
     return c.toDataURL();
   }
 
-  // Generate unique texture per card
-  document.querySelectorAll('.card').forEach((card, i) => {
-    const url = genMoss(i * 7 + 42);
+  function applyMoss(card, seed) {
+    if (card.querySelector('.moss-overlay')) return;
+    const url = genMoss(seed);
     const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:0;background-size:100% 100%;background-repeat:no-repeat;background-image:url('+url+')';
+    overlay.className = 'moss-overlay';
     card.insertBefore(overlay, card.firstChild);
-  });
+    // Set background after inserting to avoid selector issues
+    overlay.style.backgroundImage = 'url('+url+')';
+  }
+
+  // Generate unique texture per card
+  document.querySelectorAll('.card').forEach((card, i) => applyMoss(card, i * 7 + 42));
 
   // Re-apply when tabs switch (for dynamically visible cards)
+  let mossTimer = null;
   const obs = new MutationObserver(() => {
-    document.querySelectorAll('.card').forEach(card => {
-      if (!card.querySelector('[style*="background-image:url(data:"]')) {
-        const url = genMoss(Math.random()*1000|0);
-        const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:0;background-size:100% 100%;background-repeat:no-repeat;background-image:url('+url+')';
-        card.insertBefore(overlay, card.firstChild);
-      }
-    });
+    if (mossTimer) return;
+    mossTimer = setTimeout(() => {
+      mossTimer = null;
+      document.querySelectorAll('.card').forEach((card, i) => applyMoss(card, i * 7 + 42));
+    }, 100);
   });
   obs.observe(document.querySelector('.app'), { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 })();
