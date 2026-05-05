@@ -1276,13 +1276,36 @@ function refreshMeals() {
 
 // ===== Exercise =====
 const EXERCISE_DB = {
-  'Upper Body': ['Pull-ups','Chin-ups','Assisted Pull-ups','Push-ups','Incline Push-ups','DB Bench Press','DB Floor Press','DB Overhead Press','Arnold Press','Dips (bench/parallel)','One-arm DB Row','Chest-supported DB Row','Renegade Row','Inverted Row','DB Lateral Raise','DB Rear Delt Raise','Plyo Push-ups'],
+  'Upper Body': ['Pull-ups','Chin-ups','Assisted Pull-ups','Push-ups','Incline Push-ups','DB Bench Press','DB Floor Press','DB Overhead Press','Arnold Press','Dips (bench/parallel)','One-arm DB Row','Chest-supported DB Row','Renegade Row','Inverted Row','DB Lateral Raise','DB Rear Delt Raise','Plyo Push-ups','Hindu Push-ups'],
   'Legs': ['Deadlift (barbell)','Trap Bar Deadlift','Romanian Deadlift (DB/BB)','Goblet Squat','Front Squat','Back Squat','Bulgarian Split Squat','Reverse Lunge','Walking Lunge','Step-ups','Hip Thrust','Glute Bridge','KB Swing','Single-leg RDL (DB/KB)','Calf Raise (standing)','Calf Raise (seated/soleus)'],
-  'Core': ['Plank','Side Plank','Copenhagen Plank','Dead Bug','Hollow Hold','Hollow Rocks','Russian Twists','V-Ups','Bird Dog'],
-  'Power/Plyo': ['Box Jumps','Squat Jumps','Skater Jumps','Broad Jump','Med Ball Rotational Throw','Med Ball Chest Pass','Med Ball Slam'],
-  'HIIT': ['Burpees','Mountain Climbers','High Knees','Jumping Jacks','Skater Jumps','Squat Jumps','Med Ball Slam'],
+  'Core': ['Plank','Side Plank','Copenhagen Plank','Dead Bug','Hollow Hold','Hollow Rocks','Russian Twists','V-Ups','Bird Dog','Dip Station Leg Raises','Ab Crunch Machine'],
+  'Power/Plyo': ['Box Jumps','Squat Jumps','Skater Jumps','Broad Jump','Med Ball Rotational Throw','Med Ball Chest Pass','Med Ball Slam','Pop-up Drills'],
+  'HIIT': ['Burpees','Mountain Climbers','High Knees','Jumping Jacks','Skater Jumps','Squat Jumps','Med Ball Slam','Sprawl to Stand'],
   'Aerobic': ['XC Ski','Skinning','Easy Run','Hilly Walk','Easy Jog','Ski (downhill)'],
   'Mobility/Recovery': ['Rest / Mobility'],
+};
+
+const EXERCISE_SPORT = {
+  // 🏄 Surf-focused
+  'Push-ups':'🏄','Incline Push-ups':'🏄','DB Bench Press':'🏄','DB Floor Press':'🏄',
+  'DB Overhead Press':'🏄','Arnold Press':'🏄','Dips (bench/parallel)':'🏄',
+  'DB Lateral Raise':'🏄','DB Rear Delt Raise':'🏄','Plyo Push-ups':'🏄',
+  'Med Ball Rotational Throw':'🏄','Med Ball Chest Pass':'🏄',
+  'Russian Twists':'🏄','V-Ups':'🏄',
+  'Hindu Push-ups':'🏄','Pop-up Drills':'🏄','Sprawl to Stand':'🏄','Burpees':'🏄',
+  // 🎿 Ski-focused
+  'Deadlift (barbell)':'🎿','Trap Bar Deadlift':'🎿','Front Squat':'🎿','Back Squat':'🎿',
+  'Hip Thrust':'🎿','Glute Bridge':'🎿','Calf Raise (standing)':'🎿','Calf Raise (seated/soleus)':'🎿',
+  'Box Jumps':'🎿','Skater Jumps':'🎿','XC Ski':'🎿','Skinning':'🎿','Ski (downhill)':'🎿',
+  // 🔁 Both
+  'Pull-ups':'🔁','Chin-ups':'🔁','Assisted Pull-ups':'🔁','One-arm DB Row':'🔁',
+  'Chest-supported DB Row':'🔁','Renegade Row':'🔁','Inverted Row':'🔁',
+  'Romanian Deadlift (DB/BB)':'🔁','Goblet Squat':'🔁','Bulgarian Split Squat':'🔁',
+  'Reverse Lunge':'🔁','Walking Lunge':'🔁','Step-ups':'🔁','KB Swing':'🔁','Single-leg RDL (DB/KB)':'🔁',
+  'Squat Jumps':'🔁','Broad Jump':'🔁','Med Ball Slam':'🔁',
+  'Plank':'🔁','Side Plank':'🔁','Copenhagen Plank':'🔁','Dead Bug':'🔁',
+  'Hollow Hold':'🔁','Hollow Rocks':'🔁','Bird Dog':'🔁','Dip Station Leg Raises':'🔁','Ab Crunch Machine':'🔁',
+  'Easy Run':'🔁','Hilly Walk':'🔁','Easy Jog':'🔁',
 };
 
 const MET_VALUES = {
@@ -1427,7 +1450,7 @@ function setExercises(exs, date) { LS.set('exercises_' + (date || today()), exs)
 function updateExOptions() {
   const cat = document.getElementById('ex-category').value;
   const sel = document.getElementById('ex-type');
-  sel.innerHTML = (EXERCISE_DB[cat] || []).map(e => `<option value="${e}">${e}</option>`).join('');
+  sel.innerHTML = (EXERCISE_DB[cat] || []).map(e => { const sp = EXERCISE_SPORT[e] || ''; return `<option value="${e}">${sp ? sp + ' ' : ''}${e}</option>`; }).join('');
   updateExFields();
   updateExYTLink();
   showExHistory();
@@ -1530,7 +1553,7 @@ function refreshExercise() {
     if (e.notes) detail += ` · ${e.notes}`;
     li.innerHTML = `
       <div class="entry-info">
-        <div class="entry-name">${esc(e.label)}</div>
+        <div class="entry-name">${EXERCISE_SPORT[e.label] ? EXERCISE_SPORT[e.label] + ' ' : ''}${esc(e.label)}</div>
         <div class="entry-detail">${detail}</div>
       </div>
       <a class="yt-link" href="${ytSearchUrl(e.label)}" target="_blank" rel="noopener" style="margin-right:8px" title="YouTube">
