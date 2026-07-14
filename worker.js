@@ -26,7 +26,18 @@ export default {
 
     // Build message content based on whether it's a photo or text query
     let content;
-    if (body.image) {
+    if (body.image && body.nature_check) {
+      content = [
+        {
+          type: 'image',
+          source: { type: 'base64', media_type: body.media_type || 'image/jpeg', data: body.image },
+        },
+        {
+          type: 'text',
+          text: 'Is this photo showing something from nature — such as a plant, tree, flower, grass, sky, water, soil, rock, or any outdoor natural element? Respond with ONLY a single JSON object, no other text: {"isNature":true,"description":"brief description of what you see"}',
+        },
+      ];
+    } else if (body.image) {
       content = [
         {
           type: 'image',
