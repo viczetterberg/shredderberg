@@ -34,7 +34,7 @@ export default {
         },
         {
           type: 'text',
-          text: 'Is this photo showing something from nature — such as a plant, tree, flower, grass, sky, water, soil, rock, or any outdoor natural element? Respond with ONLY a single JSON object, no other text: {"isNature":true,"description":"brief description of what you see"}',
+          text: 'Does this photo contain ANY natural element — trees, plants, grass, leaves, flowers, sky, clouds, water, soil, rocks, animals, or any outdoor scenery? Be generous: even a small plant or patch of sky counts. Respond with ONLY a JSON object, no other text: {"isNature":true,"description":"brief description"}',
         },
       ];
     } else if (body.image) {
@@ -74,8 +74,8 @@ export default {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 1024,
+        model: body.nature_check ? 'claude-haiku-4-5-20251001' : 'claude-sonnet-4-5-20250929',
+        max_tokens: body.nature_check ? 256 : 1024,
         messages: [
           { role: 'user', content },
         ],
