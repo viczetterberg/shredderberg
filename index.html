@@ -759,7 +759,8 @@ input, select { font-family: 'Press Start 2P', monospace; font-size: 11px; }
         Watch
       </a>
     </div>
-    <select id="ex-type" onchange="updateExFields();updateExYTLink();showExHistory()"></select>
+    <select id="ex-type" onchange="toggleExCustom();updateExFields();updateExYTLink();showExHistory()"></select>
+    <input type="text" id="ex-custom-name" class="hidden" placeholder="Type exercise name..." oninput="updateExYTLink();showExHistory()">
     <div id="ex-history-hint" class="ex-history" style="display:none"></div>
     <label>Session Type</label>
     <select id="ex-session">
@@ -1398,8 +1399,18 @@ function renderCalendar() {
 function ytSearchUrl(name) {
   return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(name + ' exercise form');
 }
+function getSelectedExName() {
+  const sel = document.getElementById('ex-type').value;
+  if (sel === '__custom__') return document.getElementById('ex-custom-name').value.trim();
+  return sel;
+}
+function toggleExCustom() {
+  const isCustom = document.getElementById('ex-type').value === '__custom__';
+  document.getElementById('ex-custom-name').classList.toggle('hidden', !isCustom);
+  if (isCustom) document.getElementById('ex-custom-name').focus();
+}
 function updateExYTLink() {
-  const name = document.getElementById('ex-type').value;
+  const name = getSelectedExName();
   const link = document.getElementById('ex-yt-link');
   if (name) {
     link.href = ytSearchUrl(name);
@@ -1424,7 +1435,7 @@ function getExerciseHistory(name) {
   return null;
 }
 function showExHistory() {
-  const name = document.getElementById('ex-type').value;
+  const name = getSelectedExName();
   const hint = document.getElementById('ex-history-hint');
   if (!name) { hint.style.display = 'none'; return; }
   const h = getExerciseHistory(name);
@@ -1450,7 +1461,10 @@ function setExercises(exs, date) { LS.set('exercises_' + (date || today()), exs)
 function updateExOptions() {
   const cat = document.getElementById('ex-category').value;
   const sel = document.getElementById('ex-type');
-  sel.innerHTML = (EXERCISE_DB[cat] || []).map(e => { const sp = EXERCISE_SPORT[e] || ''; return `<option value="${e}">${sp ? sp + ' ' : ''}${e}</option>`; }).join('');
+  sel.innerHTML = (EXERCISE_DB[cat] || []).map(e => { const sp = EXERCISE_SPORT[e] || ''; return `<option value="${e}">${sp ? sp + ' ' : ''}${e}</option>`; }).join('')
+    + '<option value="__custom__">+ Custom exercise...</option>';
+  document.getElementById('ex-custom-name').value = '';
+  toggleExCustom();
   updateExFields();
   updateExYTLink();
   showExHistory();
@@ -1481,7 +1495,7 @@ function openExerciseModal() {
 }
 
 function saveExercise() {
-  const name = document.getElementById('ex-type').value;
+  const name = getSelectedExName();
   const cat = document.getElementById('ex-category').value;
   if (!name) return alert('Please select an exercise');
   const ex = {
