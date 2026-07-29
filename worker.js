@@ -34,7 +34,7 @@ export default {
         },
         {
           type: 'text',
-          text: 'Does this photo contain ANY natural element — trees, plants, grass, leaves, flowers, sky, clouds, water, soil, rocks, animals, or any outdoor scenery? Be generous: even a small plant or patch of sky counts. Respond with ONLY a JSON object, no other text: {"isNature":true,"description":"brief description"}',
+          text: `Does this photo contain ANY natural element - trees, plants, grass, leaves, flowers, sky, clouds, water, soil, rocks, animals, or any outdoor scenery? Be generous: even a small plant or patch of sky counts. Respond with ONLY a JSON object, no other text: {"isNature":true,"description":"brief description"}`,
         },
       ];
     } else if (body.image) {
@@ -49,7 +49,7 @@ export default {
         },
         {
           type: 'text',
-          text: 'Identify the food in this image. Estimate the visible portion size and provide realistic calorie and macro estimates. Be specific with the calorie count — never use 0 or placeholder values. Respond with ONLY a single JSON object, no other text: {"name":"food name","calories":450,"protein":30,"carbs":40,"fat":15}',
+          text: `Identify the food in this image. Estimate the visible portion size and provide realistic calorie and macro estimates. Be specific with the calorie count - never use 0 or placeholder values. Respond with ONLY a single JSON object, no other text: {"name":"food name","calories":450,"protein":30,"carbs":40,"fat":15}`,
         },
       ];
     } else if (body.text) {
