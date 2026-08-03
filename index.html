@@ -1458,10 +1458,23 @@ function getExDate() { return document.getElementById('exercise-date').value || 
 function getExercises(date) { return LS.get('exercises_' + (date || today())) || []; }
 function setExercises(exs, date) { LS.set('exercises_' + (date || today()), exs); }
 
+// ===== Custom Exercises (user-added, persisted per category) =====
+function getCustomExercises(cat) { return (LS.get('customExercises') || {})[cat] || []; }
+function addCustomExercise(cat, name) {
+  const all = LS.get('customExercises') || {};
+  const list = all[cat] || [];
+  if (!list.some(e => e.toLowerCase() === name.toLowerCase())) {
+    list.push(name);
+    all[cat] = list;
+    LS.set('customExercises', all);
+  }
+}
+
 function updateExOptions() {
   const cat = document.getElementById('ex-category').value;
   const sel = document.getElementById('ex-type');
-  sel.innerHTML = (EXERCISE_DB[cat] || []).map(e => { const sp = EXERCISE_SPORT[e] || ''; return `<option value="${e}">${sp ? sp + ' ' : ''}${e}</option>`; }).join('')
+  const allNames = (EXERCISE_DB[cat] || []).concat(getCustomExercises(cat));
+  sel.innerHTML = allNames.map(e => { const sp = EXERCISE_SPORT[e] || ''; return `<option value="${e}">${sp ? sp + ' ' : ''}${e}</option>`; }).join('')
     + '<option value="__custom__">+ Custom exercise...</option>';
   document.getElementById('ex-custom-name').value = '';
   toggleExCustom();
@@ -1498,6 +1511,7 @@ function saveExercise() {
   const name = getSelectedExName();
   const cat = document.getElementById('ex-category').value;
   if (!name) return alert('Please select an exercise');
+  if (document.getElementById('ex-type').value === '__custom__') addCustomExercise(cat, name);
   const ex = {
     id: Date.now(),
     label: name,
